@@ -14,7 +14,7 @@ function App() {
   // Current user info
   const [user, setUser] = useState<User>(null)
 
-  const handleFormSubmit = async (name: string): Promise<void> => {
+  const handleFormSubmit = async (game: string, userName: string): Promise<void> => {
     try {
       // Create connection
       const connection = new HubConnectionBuilder()
@@ -37,8 +37,8 @@ function App() {
       // Start connection
       await connection.start()
       // Call the join scrum poker game for this user
-      await connection.invoke("JoinScrumPoker", { game: '', name })
-      setUser({ name, game: '', value: '' })
+      await connection.invoke("JoinScrumPoker", { game, name: userName })
+      setUser({ name: userName, game, value: '' })
 
       setConnection(connection)
       // connection.on("JoinScrumPoker", { game: 'test', name })
@@ -60,12 +60,14 @@ function App() {
   }
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', marginBottom: 120 }}>
-      <div style={{ position: 'absolute', top: 0, marginTop: 50 }}>
+    <div style={{}}>
+      <div style={{ display: 'flex', justifyContent: 'center', position: 'fixed', left: 0, right: 0, top: 0, marginTop: 25 }}>
         <UserForm userName={user?.name} onFormSubmit={handleFormSubmit} />
       </div>
-      <CentralTable usersInfo={usersInfo} />
-      <div style={{ position: 'absolute', bottom: 0, marginBottom: 50 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CentralTable usersInfo={usersInfo} />
+      </div>
+      <div className='cards-container'>
         <Cards onCardClick={handleCardClick} />
       </div>
     </div>

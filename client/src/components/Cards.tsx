@@ -4,22 +4,16 @@ interface CardsProps {
     onCardClick: (value: string) => void
 }
 
+const CARD_VALUES = ['0', '1', '2', '3', '5', '8', '13', '21', '34', '55', '89', '?', '☕']
+
 export default function Cards({ onCardClick }: CardsProps) {
     return (
-        <div style={{ display: 'flex', flexDirection: 'row', gap: 5 }}>
-            <Card onCardClick={onCardClick}>{'0'}</Card>
-            <Card onCardClick={onCardClick}>{'1'}</Card>
-            <Card onCardClick={onCardClick}>{'2'}</Card>
-            <Card onCardClick={onCardClick}>{'3'}</Card>
-            <Card onCardClick={onCardClick}>{'5'}</Card>
-            <Card onCardClick={onCardClick}>{'8'}</Card>
-            <Card onCardClick={onCardClick}>{'13'}</Card>
-            <Card onCardClick={onCardClick}>{'21'}</Card>
-            <Card onCardClick={onCardClick}>{'34'}</Card>
-            <Card onCardClick={onCardClick}>{'55'}</Card>
-            <Card onCardClick={onCardClick}>{'89'}</Card>
-            <Card onCardClick={onCardClick}>{'?'}</Card>
-            <Card onCardClick={onCardClick}>{'☕'}</Card>
-        </div>
+        <ul style={{ whiteSpace: 'nowrap', padding: 0 }}>
+            {CARD_VALUES.map(cardValue => (
+                <li style={{ display: 'inline-block', margin: '0px 5px' }}>
+                    <Card key={cardValue} onCardClick={onCardClick}>{cardValue}</Card>
+                </li>
+            ))}
+        </ul>
     )
 }

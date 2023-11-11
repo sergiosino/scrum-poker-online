@@ -2,12 +2,21 @@
     box-sizing: border-box;
 }
 
-html,
 body {
-    height: 100%;
     margin: 0px;
 }
 
-#root {
-    height: 100%;
+.cards-container {
+    display: flex;
+    position: fixed;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    overflow-x: auto;
+}
+
+@media (min-width: 900px) {
+    .cards-container {
+        justify-content: center;
+    }
 }
