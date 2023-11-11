@@ -17,7 +17,10 @@ function App() {
   const handleFormSubmit = async (name: string): Promise<void> => {
     try {
       // Create connection
-      const connection = new HubConnectionBuilder().withUrl("https://scrum-poker-online-api.fly.dev/offers").configureLogging(LogLevel.Information).build()
+      const connection = new HubConnectionBuilder()
+        .withUrl("https://scrum-poker-online-api.fly.dev/scrum-poker-online")
+        .configureLogging(LogLevel.Information)
+        .build()
 
       // Receive the updated users
       connection.on('UpdateUsers', (newUsersInfo: UsersInfo) => {
