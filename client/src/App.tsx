@@ -1,5 +1,5 @@
 import './app.css'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import CentralTable from './components/CentralTable'
 import Cards from './components/Cards'
 import UserForm from './components/UserForm'
@@ -31,6 +31,7 @@ function App() {
       // Receive the updated users
       connection.on('ReceiveUpdatedUsers', (newUsersInfo: UsersInfo) => {
         setUsersInfo(newUsersInfo)
+        setUser(user => (newUsersInfo.find(x => x?.name === user?.name) as User))
       })
 
       // Receive the new card values
@@ -63,8 +64,9 @@ function App() {
   const handleCardClick = async (value: string): Promise<void> => {
     try {
       if (connection && value != user?.value) {
-        await connection.invoke("SelectCardValue", value)
-        setUser({ ...user, value } as User)
+        await connection.invoke("SelectCardValue", value).then(() => {
+          setUser(user => ({ ...user, value } as User))
+        })
       }
     } catch (e) {
       console.log(e)
@@ -91,6 +93,10 @@ function App() {
       console.log(e)
     }
   }
+
+  useEffect(() => {
+
+  }, [usersInfo])
 
   return (
     <div style={{}}>

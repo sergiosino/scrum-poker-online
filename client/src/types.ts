@@ -4,7 +4,7 @@ export type UsersInfo = User[]
 export type User = {
     name: string,
     room: string,
-    value?: string,
+    value?: string | null,
     isAdmin: boolean
 } | null
 
