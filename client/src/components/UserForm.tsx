@@ -1,31 +1,32 @@
 import { FormEvent } from 'react'
+import { User } from '../types'
 
 interface UserFormProps {
-    userName: string | undefined,
-    onFormSubmit: (game: string, userName: string) => void
+    user: User,
+    onFormSubmit: (room: string, userName: string) => void
 }
 
 type FormProps = {
-    gameName: { value: string }
+    roomName: { value: string }
     userName: { value: string }
 }
 
-export default function UserForm({ userName, onFormSubmit }: UserFormProps) {
+export default function UserForm({ user, onFormSubmit }: UserFormProps) {
 
     const handleFormSubmit = (event: FormEvent<HTMLFormElement>): void => {
         event.preventDefault();
         const target = event.target as EventTarget & FormProps
-        onFormSubmit(target.gameName.value, target.userName.value)
+        onFormSubmit(target.roomName.value, target.userName.value)
     }
 
     return (
         <>
-            {!userName ? (
+            {!user ? (
                 <form onSubmit={handleFormSubmit}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <label htmlFor="gameName">Game:</label>
-                            <input id='gameName' type='text' name='userName' />
+                            <label htmlFor="roomName">Room:</label>
+                            <input id='roomName' type='text' name='roomName' />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <label htmlFor="userName">User:</label>
@@ -34,7 +35,12 @@ export default function UserForm({ userName, onFormSubmit }: UserFormProps) {
                         <button type='submit'>Get in</button>
                     </div>
                 </form>
-            ) : { userName }}
+            ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                    <p>Room's name: {user.room}</p>
+                    <p>Your name: {user.name}</p>
+                </div>
+            )}
         </>
     )
 }

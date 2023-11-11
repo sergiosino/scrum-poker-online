@@ -2,8 +2,9 @@
 {
     public class UserDTO
     {
-        public string Name { get; set; }
-        public string Game { get; set; }
-        public string Value { get; set; }
+        public required string Name { get; set; }
+        public required string Room { get; set; }
+        public string? Value { get; set; }
+        public bool IsAdmin { get; set; }
     }
 }

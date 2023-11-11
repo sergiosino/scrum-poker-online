@@ -13,7 +13,7 @@ namespace ScrumPokerOnline.API.Hubs
         }
 
         /// <summary>
-        /// Select a card value for the connection id user, saves the value and updates the other players in the game
+        /// Select a card value for the connection id user, saves the value and updates the other players in the room
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
@@ -23,33 +23,80 @@ namespace ScrumPokerOnline.API.Hubs
             {
                 user.Value = value;
                 _users[Context.ConnectionId] = user;
-                await Clients.Group(user.Game).SendAsync("ReceiveCardValue", user.Name, user.Value);
+                await Clients.Group(user.Room).SendAsync("ReceiveCardValue", user.Name, user.Value);
             }
         }
 
         /// <summary>
-        /// Adds a user to a scrum poke game
+        /// Adds a user to a scrum poker room
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public async Task JoinScrumPoker(UserDTO user)
+        public async Task<UserDTO> JoinScrumPoker(UserDTO user)
         {
+            bool existsUserName = _users.Values.Any(x => x.Room == user.Room && x.Name == user.Name);
+            if(existsUserName) 
+            {
+                throw new HubException("User name already exists at this room");
+            }
+
+            bool hasRoomAnyUser = _users.Values.Any(x => x.Room == user.Room);
+            user.IsAdmin = !hasRoomAnyUser;
+
             _users[Context.ConnectionId] = user;
+            await Groups.AddToGroupAsync(Context.ConnectionId, user.Room);
+            await SendConnectedUsers(user.Room);
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, user.Game);
+            return user;
+        }
+        
+        /// <summary>
+        /// Calculates the average of all users values selected
+        /// </summary>
+        /// <returns></returns>
+        public async Task CalculateAverageRoomValue()
+        {
+            if (_users.TryGetValue(Context.ConnectionId, out UserDTO? user) && user.IsAdmin)
+            {
+                List<int> usersValues = _users.Values
+                    .Where(x => x.Room == user.Room && x.Value != null && int.TryParse(x.Value, out int temp))
+                    .Select(x => Convert.ToInt32(x.Value))
+                    .ToList();
 
-            await SendConnectedUsers(user.Game);
+                double average = 0;
+                if (usersValues.Any())
+                {
+                    average = usersValues.Average();
+                }
+                await Clients.Group(user.Room).SendAsync("ReceiveAverageRoomValue", average);
+            }
+        }
+
+        public async Task ResetRoomValues()
+        {
+            if (_users.TryGetValue(Context.ConnectionId, out UserDTO? user) && user.IsAdmin)
+            {
+                List<UserDTO> usersInRoom = _users.Values.Where(x => x.Room == user.Room).ToList();
+
+                usersInRoom.ForEach(x =>
+                {
+                    x.Value = null;
+                });
+
+                await Clients.Group(user.Room).SendAsync("ReceiveUpdatedUsers", usersInRoom);
+                await Clients.Group(user.Room).SendAsync("ReceiveAverageRoomValue", null);
+            }
         }
 
         /// <summary>
-        /// Sends an update to all the players with the current users in the game
+        /// Sends an update to all the players with the current users in the room
         /// </summary>
-        /// <param name="game"></param>
+        /// <param name="room"></param>
         /// <returns></returns>
-        public Task SendConnectedUsers(string game)
+        private Task SendConnectedUsers(string room)
         {
-            List<UserDTO> users = _users.Values.Where(x => x.Game == game).ToList();
-            return Clients.Group(game).SendAsync("UpdateUsers", users);
+            List<UserDTO> usersInRoom = _users.Values.Where(x => x.Room == room).ToList();
+            return Clients.Group(room).SendAsync("ReceiveUpdatedUsers", usersInRoom);
         }
     }
 }
