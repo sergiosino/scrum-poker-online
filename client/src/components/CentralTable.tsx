@@ -37,7 +37,7 @@ export default function CentralTable({
             <div style={{ display: 'flex', gap: 30 }}>
                 {usersInfo && usersInfo.map(userInfo => (
                     <Card key={userInfo?.name} userName={userInfo?.name}>
-                        {pokerResult !== null || userInfo?.value === null ? userInfo?.value : '**'}
+                        {pokerResult !== null || userInfo?.value === null ? (userInfo?.value as string) : '**'}
                     </Card>
                 ))}
             </div>
