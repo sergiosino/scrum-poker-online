@@ -5,7 +5,7 @@ import Cards from './components/Cards'
 import UserForm from './components/UserForm'
 import { HubError, PokerResult, User, UsersInfo } from './types'
 import { HubConnectionBuilder, LogLevel, HubConnection } from '@microsoft/signalr'
-import { useHubError } from './hooks/useHubError'
+import { useError } from './hooks/useError'
 
 function App() {
   // SignalR Hub connection
@@ -17,7 +17,7 @@ function App() {
   // Saves the poker result, the average of all users selection
   const [pokerResult, setPokerResult] = useState<PokerResult>(null)
 
-  const { error, addError } = useHubError()
+  const { error, addError, addErrorHub } = useError()
 
   const handleFormSubmit = async (room: string, userName: string): Promise<void> => {
     try {
@@ -45,8 +45,8 @@ function App() {
       })
 
       connection.on('ReceiveKickFromRoom', () => {
-        alert('You have been kicked from the room')
-        location.reload()
+        setUser(null)
+        addError('You have been kicked from the room')
       })
 
       // Start connection
@@ -56,7 +56,7 @@ function App() {
       await connection.invoke("JoinScrumPoker", { room, name: userName }).then((newUser: User) => {
         setUser(newUser)
       }).catch((e: HubError) => {
-        addError(e)
+        addErrorHub(e)
       })
 
       setConnection(connection)
