@@ -1,5 +1,5 @@
 import './app.css'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import CentralTable from './components/CentralTable'
 import Cards from './components/Cards'
 import UserForm from './components/UserForm'
@@ -44,6 +44,11 @@ function App() {
         setPokerResult(average)
       })
 
+      connection.on('ReceiveKickFromRoom', () => {
+        alert('You have been kicked from the room')
+        location.reload()
+      })
+
       // Start connection
       await connection.start()
 
@@ -69,34 +74,42 @@ function App() {
         })
       }
     } catch (e) {
-      console.log(e)
+      console.log('handleCardClick', e)
     }
   }
 
-  // Ask to calculate the average room value of the cards selected by the users
+  // Calculate the average room value of the cards selected by the users
   const handleCalculatePokerResult = async (): Promise<void> => {
     try {
       if (connection) {
         await connection.invoke("CalculateAverageRoomValue")
       }
     } catch (e) {
-      console.log(e)
+      console.log('handleCalculatePokerResult', e)
     }
   }
 
+  // The admin could reset all the users selected value
   const handleResetPokerValues = async (): Promise<void> => {
     try {
       if (connection) {
         await connection.invoke("ResetRoomValues")
       }
     } catch (e) {
-      console.log(e)
+      console.log('handleResetPokerValues', e)
     }
   }
 
-  useEffect(() => {
-
-  }, [usersInfo])
+  // Kicks a player from the room
+  const handleRemovePlayer = async (userName: string): Promise<void> => {
+    try {
+      if (connection) {
+        await connection.invoke("RemoveUserFromRoom", user?.room, userName)
+      }
+    } catch (e) {
+      console.log('handleRemovePlayer', e)
+    }
+  }
 
   return (
     <div style={{}}>
@@ -112,11 +125,15 @@ function App() {
               pokerResult={pokerResult}
               onCalculatePokerResult={handleCalculatePokerResult}
               onResetPokerValues={handleResetPokerValues}
+              onDeleteClick={handleRemovePlayer}
               isAdmin={user.isAdmin}
             />
           </div>
           <div className='cards-container'>
-            <Cards cardSelected={user.value as string} onCardClick={handleCardClick} />
+            <Cards
+              cardSelected={user.value as string}
+              onCardClick={handleCardClick}
+            />
           </div>
         </>
       )}

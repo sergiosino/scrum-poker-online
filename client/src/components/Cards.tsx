@@ -12,7 +12,12 @@ export default function Cards({ onCardClick, cardSelected }: CardsProps) {
         <ul style={{ whiteSpace: 'nowrap', padding: 0 }}>
             {CARD_VALUES.map(cardValue => (
                 <li key={cardValue} style={{ display: 'inline-block', margin: '0px 5px' }}>
-                    <Card onCardClick={onCardClick} isSelected={cardSelected === cardValue}>{cardValue}</Card>
+                    <Card
+                        onCardClick={onCardClick}
+                        isSelected={cardSelected === cardValue}
+                    >
+                        {cardValue}
+                    </Card>
                 </li>
             ))}
         </ul>

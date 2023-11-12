@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using ScrumPokerOnline.API.DTOs;
+using System.Security.Cryptography;
 
 namespace ScrumPokerOnline.API.Hubs
 {
@@ -72,6 +73,10 @@ namespace ScrumPokerOnline.API.Hubs
             }
         }
 
+        /// <summary>
+        /// Update all users selected value of the room to null
+        /// </summary>
+        /// <returns></returns>
         public async Task ResetRoomValues()
         {
             if (_users.TryGetValue(Context.ConnectionId, out UserDTO? user) && user.IsAdmin)
@@ -89,14 +94,33 @@ namespace ScrumPokerOnline.API.Hubs
         }
 
         /// <summary>
+        /// Remove user from a room, to do so it will remove the connection
+        /// </summary>
+        /// <param name="roomName"></param>
+        /// <param name="userName"></param>
+        /// <returns></returns>
+        public async Task RemoveUserFromRoom(string roomName, string userName)
+        {
+            if (_users.TryGetValue(Context.ConnectionId, out UserDTO? user) && user.IsAdmin)
+            {
+                string userToRemove = _users.FirstOrDefault(x => x.Value.Room == roomName && x.Value.Name == userName).Key;
+                _users.Remove(userToRemove);
+                await Groups.RemoveFromGroupAsync(userToRemove, roomName);
+
+                await Clients.Client(userToRemove).SendAsync("ReceiveKickFromRoom");
+                await SendConnectedUsers(roomName);
+            }
+        }
+
+        /// <summary>
         /// Sends an update to all the players with the current users in the room
         /// </summary>
-        /// <param name="room"></param>
+        /// <param name="roomName"></param>
         /// <returns></returns>
-        private Task SendConnectedUsers(string room)
+        private Task SendConnectedUsers(string roomName)
         {
-            List<UserDTO> usersInRoom = _users.Values.Where(x => x.Room == room).ToList();
-            return Clients.Group(room).SendAsync("ReceiveUpdatedUsers", usersInRoom);
+            List<UserDTO> usersInRoom = _users.Values.Where(x => x.Room == roomName).ToList();
+            return Clients.Group(roomName).SendAsync("ReceiveUpdatedUsers", usersInRoom);
         }
     }
 }

@@ -6,15 +6,17 @@ interface TableProps {
     pokerResult: PokerResult,
     onCalculatePokerResult: () => void,
     onResetPokerValues: () => void,
+    onDeleteClick?: (value: string) => void,
     isAdmin?: boolean,
 }
 
-export default function CentralTable({ 
-    usersInfo, 
-    pokerResult, 
-    onCalculatePokerResult, 
-    onResetPokerValues, 
-    isAdmin 
+export default function CentralTable({
+    usersInfo,
+    pokerResult,
+    onCalculatePokerResult,
+    onResetPokerValues,
+    onDeleteClick,
+    isAdmin
 }: TableProps) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 50 }}>
@@ -36,7 +38,12 @@ export default function CentralTable({
             </div>
             <div style={{ display: 'flex', gap: 30 }}>
                 {usersInfo && usersInfo.map(userInfo => (
-                    <Card key={userInfo?.name} userName={userInfo?.name}>
+                    <Card
+                        key={userInfo?.name}
+                        userName={userInfo?.name}
+                        isAdmin={isAdmin}
+                        onDeleteClick={onDeleteClick}
+                    >
                         {pokerResult !== null || userInfo?.value === null ? (userInfo?.value as string) : '**'}
                     </Card>
                 ))}
