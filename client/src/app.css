@@ -6,6 +6,34 @@ body {
     margin: 0px;
 }
 
+p {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+button {
+    border: 1px solid black;
+    border-radius: 6px;
+}
+
+.user-form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+}
+
+.central-table-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
 .cards-container {
     display: flex;
     position: fixed;
@@ -18,5 +46,23 @@ body {
 @media (min-width: 900px) {
     .cards-container {
         justify-content: center;
+    }
+}
+
+@media (max-width: 900px) {
+    .user-form-container {
+        border-bottom: 1px solid black;
+        background-color: white;
+        z-index: 1;
+    }
+
+    .central-table-container {
+        margin-bottom: 70px;
+    }
+
+    .cards-container {
+        border-top: 1px solid black;
+        background-color: white;
+        z-index: 1;
     }
 }

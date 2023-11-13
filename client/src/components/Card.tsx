@@ -18,7 +18,7 @@ export default function Card({
 }: CardProps) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', border: '1px solid black', width: 50, height: 100, backgroundColor: isSelected ? 'lightgray' : 'white' }}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', border: '1px solid black', width: 50, height: 100, borderRadius: 6, backgroundColor: isSelected ? 'lightgray' : 'white' }}
                 onClick={() => onCardClick && children && onCardClick(children)} >
                 <p>{children}</p>
                 {isAdmin && (

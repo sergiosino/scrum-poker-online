@@ -113,13 +113,13 @@ function App() {
 
   return (
     <div style={{}}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'fixed', left: 0, right: 0, top: 0, marginTop: 25 }}>
+      <div className='user-form-container'>
         <UserForm user={user} onFormSubmit={handleFormSubmit} />
         {error && <p>{error}</p>}
       </div>
       {user && (
         <>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <div className='central-table-container'>
             <CentralTable
               usersInfo={usersInfo}
               pokerResult={pokerResult}
