@@ -1,8 +1,7 @@
-
 interface CardProps {
     children?: string,
     onCardClick?: (value: string) => void,
-    onDeleteClick?: (value: string) => void,
+    onKickOutClick?: (value: string) => void,
     userName?: string,
     isSelected?: boolean,
     isAdmin?: boolean,
@@ -10,7 +9,7 @@ interface CardProps {
 
 export default function Card({
     onCardClick,
-    onDeleteClick,
+    onKickOutClick,
     userName,
     children,
     isSelected,
@@ -23,7 +22,7 @@ export default function Card({
                 <p>{children}</p>
                 {isAdmin && (
                     <div style={{ position: 'absolute', right: 2, top: 2 }}>
-                        <button onClick={() => onDeleteClick && userName && onDeleteClick(userName)}>x</button>
+                        <button onClick={() => onKickOutClick && userName && onKickOutClick(userName)}>x</button>
                     </div>
                 )}
             </div>

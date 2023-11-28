@@ -20,7 +20,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IDictionary<string, UserDTO>>(options => new Dictionary<string, UserDTO>());
+builder.Services.AddSingleton(options => new List<RoomDTO>());
 
 var app = builder.Build();
 

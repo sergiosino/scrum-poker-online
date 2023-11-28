@@ -1,126 +1,188 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using ScrumPokerOnline.API.DTOs;
-using System.Security.Cryptography;
+using ScrumPokerOnline.API.Enums;
 
 namespace ScrumPokerOnline.API.Hubs
 {
     public class ScrumPokerOnlineHub : Hub
     {
-        private readonly IDictionary<string, UserDTO> _users;
+        private readonly List<RoomDTO> _rooms;
+        private const int HOURS_LIFE_ROOM = 4;
 
-        public ScrumPokerOnlineHub(IDictionary<string, UserDTO> users)
+        public ScrumPokerOnlineHub(List<RoomDTO> rooms)
         {
-            _users = users;
+            _rooms = rooms;
         }
 
-        /// <summary>
-        /// Select a card value for the connection id user, saves the value and updates the other players in the room
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
+        public async Task<RoomDTO> CreateUserAndRoom(string roomName, string userName)
+        {
+            if(string.IsNullOrWhiteSpace(roomName) || string.IsNullOrWhiteSpace(userName))
+            {
+                throw new HubException("Room and user name cannot be empty");
+            }
+
+            DeleteOldRooms();
+
+            RoomDTO room = new RoomDTO(roomName);
+
+            UserDTO user = new UserDTO(Context.ConnectionId, userName, true);
+            room.Users.Add(user);
+            _rooms.Add(room);
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, room.Id);
+            await Clients.Client(Context.ConnectionId).SendAsync(HubInvokeMethodsEnum.ReceiveMyUserId.ToString(), user.Id);
+
+            return room;
+        }
+
+        public async Task<RoomDTO> CreateUserAndJoinRoom(string roomId, string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                throw new HubException("User name cannot be empty");
+            }
+
+            RoomDTO? room = _rooms.FirstOrDefault(x => x.Id == roomId);
+            if (room == null)
+            {
+                throw new HubException("This room does not exists");
+            }
+
+            bool userNameAlreadyExists = room.Users.Any(x => x.Name == userName);
+            if (userNameAlreadyExists)
+            {
+                throw new HubException("User name already exists in the room");
+            }
+
+            UserDTO user = new UserDTO(Context.ConnectionId, userName);
+            room.Users.Add(user);
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, room.Id);
+            await Clients.Client(Context.ConnectionId).SendAsync(HubInvokeMethodsEnum.ReceiveMyUserId.ToString(), user.Id);
+            await SendRoomUsersUpdatedInfo(room.Id);
+
+            return room;
+        }
+
+        public RoomDTO RetrieveUserRoom(string userId)
+        {
+            RoomDTO? room = _rooms.FirstOrDefault(x => x.Users.Any(u => u.Id == userId));
+            if (room == null)
+            {
+                throw new HubException("The room could not be recovered");
+            }
+
+            return room;
+        }
+
         public async Task SelectCardValue(string value)
         {
-            if(_users.TryGetValue(Context.ConnectionId, out UserDTO? user))
+            RoomDTO room = CheckIfConnectionIdInRoom();
+            
+            if(room.State == RoomStatesEnum.WatchingFinalAverage)
             {
-                user.Value = value;
-                _users[Context.ConnectionId] = user;
-                await Clients.Group(user.Room).SendAsync("ReceiveCardValue", user.Name, user.Value);
-            }
-        }
-
-        /// <summary>
-        /// Adds a user to a scrum poker room
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>
-        public async Task<UserDTO> JoinScrumPoker(UserDTO user)
-        {
-            bool existsUserName = _users.Values.Any(x => x.Room == user.Room && x.Name == user.Name);
-            if(existsUserName) 
-            {
-                throw new HubException("User name already exists at this room");
+                throw new HubException("Reset the game before selecting a new card");
             }
 
-            bool hasRoomAnyUser = _users.Values.Any(x => x.Room == user.Room);
-            user.IsAdmin = !hasRoomAnyUser;
+            UserDTO user = room.Users.First(x => x.ConnectionId == Context.ConnectionId);
+            user.CardValue = value;
 
-            _users[Context.ConnectionId] = user;
-            await Groups.AddToGroupAsync(Context.ConnectionId, user.Room);
-            await SendConnectedUsers(user.Room);
+            room.State = RoomStatesEnum.WithSomeSelectedCards;
 
-            return user;
+            await SendRoomUsersUpdatedInfo(room.Id);
         }
-        
-        /// <summary>
-        /// Calculates the average of all users values selected
-        /// </summary>
-        /// <returns></returns>
+
         public async Task CalculateAverageRoomValue()
         {
-            if (_users.TryGetValue(Context.ConnectionId, out UserDTO? user) && user.IsAdmin)
-            {
-                List<int> usersValues = _users.Values
-                    .Where(x => x.Room == user.Room && x.Value != null && int.TryParse(x.Value, out int temp))
-                    .Select(x => Convert.ToInt32(x.Value))
-                    .ToList();
+            RoomDTO room = CheckIfConnectionIdInRoom();
 
-                double average = 0;
-                if (usersValues.Any())
-                {
-                    average = usersValues.Average();
-                }
-                await Clients.Group(user.Room).SendAsync("ReceiveAverageRoomValue", average);
+            List<int> usersCardValues = room.Users
+                .Where(x => x.CardValue != null && int.TryParse(x.CardValue, out int temp))
+                .Select(x => Convert.ToInt32(x.CardValue))
+                .ToList();
+
+            string average = "0";
+            if (usersCardValues.Any())
+            {
+                average = usersCardValues.Average().ToString("0.00");
+            }
+            room.Average = average;
+            room.State = RoomStatesEnum.WatchingFinalAverage;
+
+            await SendRoomUsersUpdatedInfo(room.Id);
+        }
+
+        public async Task RestartRoomVote()
+        {
+            RoomDTO room = CheckIfConnectionIdInRoom();
+
+            room.State = RoomStatesEnum.NoCardsSelected;
+            room.Average = null;
+            room.Users.ForEach(x =>
+            {
+                x.CardValue = null;
+            });
+
+            await SendRoomUsersUpdatedInfo(room.Id);
+        }
+
+        public async Task KickOutUserFromRoom(string userId)
+        {
+            RoomDTO room = CheckIfConnectionIdInRoom(true);
+
+            UserDTO userToRemove = room.Users.First(x => x.Id == userId);
+            room.Users.Remove(userToRemove);
+            await Groups.RemoveFromGroupAsync(userToRemove.ConnectionId, room.Id);
+
+            await Clients.Client(userToRemove.ConnectionId).SendAsync(HubInvokeMethodsEnum.ReceiveKickOut.ToString());
+            await SendRoomUsersUpdatedInfo(room.Id, userToRemove.Id);
+        }
+
+        public async Task LeaveRoom()
+        {
+            RoomDTO room = CheckIfConnectionIdInRoom();
+            room.Users.RemoveAll(x => x.ConnectionId == Context.ConnectionId);
+
+            if (room.Users.Any())
+            {
+                await SendRoomUsersUpdatedInfo(room.Id);
+            }
+            else
+            {
+                _rooms.Remove(room);
             }
         }
 
-        /// <summary>
-        /// Update all users selected value of the room to null
-        /// </summary>
-        /// <returns></returns>
-        public async Task ResetRoomValues()
+        private RoomDTO CheckIfConnectionIdInRoom(bool hasToBeAdmin = false)
         {
-            if (_users.TryGetValue(Context.ConnectionId, out UserDTO? user) && user.IsAdmin)
+            RoomDTO? room = _rooms.FirstOrDefault(x => x.Users.Any(u => u.ConnectionId == Context.ConnectionId 
+                && ((hasToBeAdmin && u.IsAdmin) || !hasToBeAdmin)));
+
+            if (room == null)
             {
-                List<UserDTO> usersInRoom = _users.Values.Where(x => x.Room == user.Room).ToList();
-
-                usersInRoom.ForEach(x =>
-                {
-                    x.Value = null;
-                });
-
-                await Clients.Group(user.Room).SendAsync("ReceiveUpdatedUsers", usersInRoom);
-                await Clients.Group(user.Room).SendAsync("ReceiveAverageRoomValue", null);
+                throw new HubException("User does not exist or does not have permissions");
+            }
+            else
+            {
+                return room;
             }
         }
 
-        /// <summary>
-        /// Remove user from a room, to do so it will remove the connection
-        /// </summary>
-        /// <param name="roomName"></param>
-        /// <param name="userName"></param>
-        /// <returns></returns>
-        public async Task RemoveUserFromRoom(string roomName, string userName)
+        private async Task SendRoomUsersUpdatedInfo(string roomId)
         {
-            if (_users.TryGetValue(Context.ConnectionId, out UserDTO? user) && user.IsAdmin)
-            {
-                string userToRemove = _users.FirstOrDefault(x => x.Value.Room == roomName && x.Value.Name == userName).Key;
-                _users.Remove(userToRemove);
-                await Groups.RemoveFromGroupAsync(userToRemove, roomName);
-
-                await Clients.Client(userToRemove).SendAsync("ReceiveKickFromRoom");
-                await SendConnectedUsers(roomName);
-            }
+            RoomDTO room = _rooms.First(x => x.Id == roomId);
+            await Clients.Group(roomId).SendAsync(HubInvokeMethodsEnum.ReceiveRoomUpdate.ToString(), room);
         }
 
-        /// <summary>
-        /// Sends an update to all the players with the current users in the room
-        /// </summary>
-        /// <param name="roomName"></param>
-        /// <returns></returns>
-        private Task SendConnectedUsers(string roomName)
+        private async Task SendRoomUsersUpdatedInfo(string roomId, object arg1)
         {
-            List<UserDTO> usersInRoom = _users.Values.Where(x => x.Room == roomName).ToList();
-            return Clients.Group(roomName).SendAsync("ReceiveUpdatedUsers", usersInRoom);
+            RoomDTO room = _rooms.First(x => x.Id == roomId);
+            await Clients.Group(roomId).SendAsync(HubInvokeMethodsEnum.ReceiveRoomUpdate.ToString(), room, arg1);
+        }
+
+        private void DeleteOldRooms()
+        {
+            _rooms.RemoveAll(x => x.CreationDate.AddHours(HOURS_LIFE_ROOM) < DateTime.Now);
         }
     }
 }

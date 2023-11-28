@@ -1,11 +1,11 @@
-import { useRef, useState } from "react"
+import { useContext } from "react"
 import { HubError } from "../types"
+import { ErrorContext } from "../contexts/ErrorContext"
 
 // Returns the error returned by the Hub
 export function useError() {
     // Text error
-    const [error, setError] = useState<string | null>(null)
-    const errorTimeout = useRef<number | null>(null)
+    const { error, errorTimeout, setError } = useContext(ErrorContext)
 
     const addErrorHub = (newError: HubError): void => {
         const message = (newError?.message as string).split('HubException: ')[1]
