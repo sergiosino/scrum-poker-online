@@ -33,7 +33,7 @@ export default function UserForm() {
             ).then((room: Room) => {
                 setRoom(room)
             })
-        } 
+        }
         else {
             invokeHubMethod(
                 HubInvokeMethodsEnum.CreateUserAndRoom,
@@ -49,22 +49,20 @@ export default function UserForm() {
     }
 
     return (
-        <div style={{ margin: '50px 0px' }}>
-            <form onSubmit={handleFormSubmit}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                    {!urlParamRoomId && (
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <label htmlFor="roomName">Room:</label>
-                            <input id='roomName' type='text' name='roomName' />
-                        </div>
-                    )}
+        <form onSubmit={handleFormSubmit}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                {!urlParamRoomId && (
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <label htmlFor="userName">User:</label>
-                        <input id='userName' type='text' name='userName' />
+                        <label htmlFor="roomName">Room:</label>
+                        <input id='roomName' type='text' name='roomName' />
                     </div>
-                    <button type='submit'>Get in</button>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <label htmlFor="userName">User:</label>
+                    <input id='userName' type='text' name='userName' />
                 </div>
-            </form>
-        </div>
+                <button type='submit'>Get in</button>
+            </div>
+        </form>
     )
 }

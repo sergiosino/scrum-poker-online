@@ -1,5 +1,6 @@
 import { PropsWithChildren, createContext, useEffect, useState } from "react";
 import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { URL_API } from "../constants";
 
 interface HubConnectionContextProps {
     connection: HubConnection | null
@@ -13,8 +14,7 @@ export function HubConnectionContextProvider({ children }: PropsWithChildren) {
     useEffect(() => {
         const createConnection = async (): Promise<void> => {
             const connection = new HubConnectionBuilder()
-                .withUrl("https://scrum-poker-online-api.fly.dev/scrum-poker-online")
-                // .withUrl("https://localhost:7073/scrum-poker-online")
+                .withUrl(URL_API)
                 .configureLogging(LogLevel.Information)
                 .build()
 
@@ -22,6 +22,7 @@ export function HubConnectionContextProvider({ children }: PropsWithChildren) {
             
             setConnection(connection)
         }
+        
         createConnection()
     }, [])
 

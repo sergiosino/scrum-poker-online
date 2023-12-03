@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using ScrumPokerOnline.API.DTOs;
 using ScrumPokerOnline.API.Enums;
+using System.Text.RegularExpressions;
 
 namespace ScrumPokerOnline.API.Hubs
 {
@@ -64,13 +65,20 @@ namespace ScrumPokerOnline.API.Hubs
             return room;
         }
 
-        public RoomDTO RetrieveUserRoom(string userId)
+        public async Task<RoomDTO> RetrieveUserRoom(string userId)
         {
             RoomDTO? room = _rooms.FirstOrDefault(x => x.Users.Any(u => u.Id == userId));
+
             if (room == null)
             {
                 throw new HubException("The room could not be recovered");
             }
+
+            UserDTO user = room.Users.First(x => x.Id == userId);
+            await Groups.RemoveFromGroupAsync(user.ConnectionId, room.Id);
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, room.Id);
+            user.ConnectionId = Context.ConnectionId;
 
             return room;
         }
