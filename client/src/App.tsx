@@ -11,6 +11,7 @@ import { useHubInvokeMethods } from './hooks/useHubInvokeMethods'
 import { HubInvokeMethodsEnum } from './enums'
 import { useHubReceiveMethods } from './hooks/useHubReceiveMethods'
 import { Room } from './types'
+import { updateUrlWithoutRefresh } from './helpers'
 
 function App() {
   const { room, setRoom, user, userId, leaveRoom } = useContext(GameContext)
@@ -22,10 +23,11 @@ function App() {
   const isUserInGame = !!(room && user)
 
   useEffect(() => {
-    // After a page refresh room info is lost so
+    // After a page refresh room info is lost so,
     // if userId exists and does not have room, try to retrieve room info
     if (connection && userId.current && !room) {
       invokeHubMethod(HubInvokeMethodsEnum.RetrieveUserRoom, userId.current).then((retrievedRoom: Room) => {
+        updateUrlWithoutRefresh(retrievedRoom.id)
         createAllReceiveMethods()
         setRoom(retrievedRoom)
       }).catch(() => {
@@ -33,7 +35,7 @@ function App() {
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [connection])
 
   return (
     <div className='app-container'>

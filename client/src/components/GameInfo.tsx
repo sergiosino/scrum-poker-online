@@ -1,8 +1,8 @@
 import { useContext } from 'react'
 import { GameContext } from '../contexts/GameContext'
-import { URL_PARAM_ROOM } from '../constants'
 import { useHubInvokeMethods } from '../hooks/useHubInvokeMethods'
 import { HubInvokeMethodsEnum } from '../enums'
+import { getUrlWithRoomId, updateUrlToOriginWithRefresh } from '../helpers'
 
 export default function GameInfo() {
     const { room, user, leaveRoom } = useContext(GameContext)
@@ -12,15 +12,14 @@ export default function GameInfo() {
     if(!room || !user) { return }
 
     const handleCopyInviteLinkClick = (): void => {
-        const inviteUrl = new URL(window.location.origin)
-        inviteUrl.searchParams.append(URL_PARAM_ROOM, room.id)
+        const inviteUrl = getUrlWithRoomId(room.id)
         navigator.clipboard.writeText(inviteUrl.href)
     }
 
     const handleLeaveRoomClick = (): void => {
         invokeHubMethod(HubInvokeMethodsEnum.LeaveRoom).finally(() => {
             leaveRoom()
-            window.location.href = window.location.origin
+            updateUrlToOriginWithRefresh()
         })
     }
 

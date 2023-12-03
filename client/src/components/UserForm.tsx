@@ -5,6 +5,7 @@ import { Room } from '../types'
 import { useHubInvokeMethods } from '../hooks/useHubInvokeMethods'
 import { useHubReceiveMethods } from '../hooks/useHubReceiveMethods'
 import { URL_PARAM_ROOM } from '../constants'
+import { updateUrlWithoutRefresh } from '../helpers'
 
 type FormProps = {
     roomName: { value: string }
@@ -40,9 +41,7 @@ export default function UserForm() {
                 target.roomName.value,
                 target.userName.value
             ).then((room: Room) => {
-                const inviteUrl = new URL(window.location.origin)
-                inviteUrl.searchParams.append(URL_PARAM_ROOM, room.id)
-                window.history.pushState({}, '', inviteUrl);
+                updateUrlWithoutRefresh(room.id)
                 setRoom(room)
             })
         }

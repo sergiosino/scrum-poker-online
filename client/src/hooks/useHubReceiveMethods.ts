@@ -3,6 +3,7 @@ import { HubConnectionContext } from "../contexts/HubConnectionContext"
 import { Room } from "../types"
 import { GameContext } from "../contexts/GameContext"
 import { HubReceiveMethodsEnum } from "../enums"
+import { updateUrlToOriginWithRefresh } from "../helpers"
 
 export function useHubReceiveMethods() {
     const { connection } = useContext(HubConnectionContext)
@@ -19,7 +20,7 @@ export function useHubReceiveMethods() {
         
         connection?.on(HubReceiveMethodsEnum.ReceiveKickOut, () => {
             leaveRoom()
-            window.location.href = window.location.origin
+            updateUrlToOriginWithRefresh()
         })
     }
 
