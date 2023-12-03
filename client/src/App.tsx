@@ -12,6 +12,7 @@ import { HubInvokeMethodsEnum } from './enums'
 import { useHubReceiveMethods } from './hooks/useHubReceiveMethods'
 import { Room } from './types'
 import { updateUrlWithoutRefresh } from './helpers'
+import PokerIssues from './components/PokerIssues'
 
 function App() {
   const { room, setRoom, user, userId, leaveRoom } = useContext(GameContext)
@@ -46,7 +47,7 @@ function App() {
             ? <GameInfo />
             : <UserForm />
           }
-          {error && <p>{error}</p>}
+          {error && <span>{error}</span>}
         </div>
         {user && (
           <>
@@ -60,9 +61,7 @@ function App() {
         )}
       </div>
       {isUserInGame && (
-        <div className='issues-container'>
-          Work in progress
-        </div>
+        <PokerIssues />
       )}
     </div>
   )

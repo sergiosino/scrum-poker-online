@@ -24,7 +24,7 @@ export default function GameInfo() {
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
             <div style={{ display: 'flex', gap: 10 }}>
                 <button onClick={handleCopyInviteLinkClick}>
                     Copy invite link
@@ -33,8 +33,8 @@ export default function GameInfo() {
                     Leave
                 </button>
             </div>
-            <p><b>Room's name:</b> {room.name}</p>
-            <p><b>Your name:</b> {user.name}</p>
+            <span><b>Room's name:</b> {room.name}</span>
+            <span><b>Your name:</b> {user.name}</span>
         </div>
     )
 }

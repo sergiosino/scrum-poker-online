@@ -4,6 +4,8 @@ import { useHubInvokeMethods } from "../hooks/useHubInvokeMethods"
 import { GameContext } from '../contexts/GameContext'
 import UsersCards from './UsersCards'
 
+const TEXT_SELECT_CARD = 'Select a card!'
+
 export default function CentralTable() {
     const { user, room } = useContext(GameContext)
 
@@ -14,6 +16,7 @@ export default function CentralTable() {
     const numberUsersUp = Math.round(room.users.length / 2)
     const usersUp = room.users.slice(0, numberUsersUp)
     const usersDown = room.users.slice(numberUsersUp, room.users.length)
+    const issueVoting = room.issues.find(issue => issue.isVoting)
 
     // Calculate the average room value of the cards selected by the users
     const handleCalculatePokerResult = (): void => {
@@ -37,21 +40,27 @@ export default function CentralTable() {
                 onKickOutClick={handleKickOutUser}
             />
             <div className='central-table'>
-                {(room.state === RoomStatesEnum.NoCardsSelected || room.state === RoomStatesEnum.WithSomeSelectedCards) && (
-                    <p>Select a card!</p>
+                {issueVoting && (
+                    <span className='issue-name-row-limit'>{issueVoting.name}</span>
                 )}
-                {room.state === RoomStatesEnum.WatchingFinalAverage && (
-                    <p>The average is: <b>{room.average}</b></p>
+                {(room.state === RoomStatesEnum.NoCardsSelected) && (
+                    <span>{TEXT_SELECT_CARD}</span>
                 )}
                 {room.state === RoomStatesEnum.WithSomeSelectedCards && (
-                    <button onClick={handleCalculatePokerResult}>
-                        Calculate
-                    </button>
+                    <>
+                        <span>{TEXT_SELECT_CARD}</span>
+                        <button onClick={handleCalculatePokerResult}>
+                            Calculate
+                        </button>
+                    </>
                 )}
                 {room.state === RoomStatesEnum.WatchingFinalAverage && (
-                    <button onClick={handleResetPokerValues}>
-                        Reset
-                    </button>
+                    <>
+                        <span>The average is: <b>{room.average}</b></span>
+                        <button style={{ marginTop: 10 }} onClick={handleResetPokerValues}>
+                            Reset
+                        </button>
+                    </>
                 )}
             </div>
             <UsersCards
