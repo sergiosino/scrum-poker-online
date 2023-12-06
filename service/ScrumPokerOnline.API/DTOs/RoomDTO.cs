@@ -1,5 +1,5 @@
 ﻿using ScrumPokerOnline.API.Enums;
-using System.Text.Json.Serialization;
+using ScrumPokerOnline.API.Models;
 
 namespace ScrumPokerOnline.API.DTOs
 {
@@ -11,17 +11,13 @@ namespace ScrumPokerOnline.API.DTOs
         public List<UserDTO> Users { get; set; }
         public List<IssueDTO> Issues { get; set; }
 
-        [JsonIgnore]
-        public DateTime CreationDate { get; }
-
-        public RoomDTO(string roomName)
+        public RoomDTO(Room room)
         {
-            Id = Guid.NewGuid().ToString();
-            Name = roomName;
-            State = RoomStatesEnum.NoIssueSelected;
-            Users = new List<UserDTO>();
-            Issues = new List<IssueDTO>();
-            CreationDate = DateTime.Now;
+            Id = room.Id.ToString();
+            Name = room.Name;
+            State = room.State;
+            Users = room.Users.Select(x => new UserDTO(x)).ToList();
+            Issues = room.Issues.Select(x => new IssueDTO(x)).ToList();
         }
     }
 }

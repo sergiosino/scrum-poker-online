@@ -1,4 +1,6 @@
-﻿namespace ScrumPokerOnline.API.DTOs
+﻿using ScrumPokerOnline.API.Models;
+
+namespace ScrumPokerOnline.API.DTOs
 {
     public class IssueDTO
     {
@@ -7,12 +9,12 @@
         public string Average { get; set; }
         public bool IsVoting { get; set; }
 
-        public IssueDTO(string name)
+        public IssueDTO(Issue issue)
         {
-            Id = Guid.NewGuid().ToString();
-            Name = name;
-            Average = "-";
-            IsVoting = false;
+            Id = issue.Id;
+            Name = issue.Name;
+            Average = issue.Average;
+            IsVoting = issue.IsVoting;
         }
     }
 }

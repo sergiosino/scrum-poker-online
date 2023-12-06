@@ -1,5 +1,8 @@
-using ScrumPokerOnline.API.DTOs;
+using DotNetEnv;
+using MongoDB.Driver;
 using ScrumPokerOnline.API.Hubs;
+using ScrumPokerOnline.API.Repositories;
+using ScrumPokerOnline.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +23,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton(options => new List<RoomDTO>());
+Env.Load();
+string connectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION") ?? string.Empty;
+string databaseName = builder.Configuration["MongoDbName"] ?? string.Empty;
+
+builder.Services.AddScoped(x => new MongoClient(connectionString).GetDatabase(databaseName));
+builder.Services.AddScoped<RoomsService>();
+builder.Services.AddScoped<RoomsRepository>();
 
 var app = builder.Build();
 

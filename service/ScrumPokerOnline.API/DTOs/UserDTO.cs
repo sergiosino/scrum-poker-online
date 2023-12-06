@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using ScrumPokerOnline.API.Models;
 
 namespace ScrumPokerOnline.API.DTOs
 {
@@ -9,16 +9,12 @@ namespace ScrumPokerOnline.API.DTOs
         public string? CardValue { get; set; }
         public bool IsAdmin { get; set; }
 
-        [JsonIgnore]
-        public string ConnectionId { get; set; }
-
-        public UserDTO(string connectionId, string userName, bool isAdmin = false)
+        public UserDTO(User user)
         {
-            Id = Guid.NewGuid().ToString();
-            ConnectionId = connectionId;
-            Name = userName;
-            CardValue = null;
-            IsAdmin = isAdmin;
+            Id = user.Id;
+            Name = user.Name;
+            CardValue = user.CardValue;
+            IsAdmin = user.IsAdmin;
         }
     }
 }
