@@ -6,6 +6,7 @@ import { useHubInvokeMethods } from '../hooks/useHubInvokeMethods'
 import { useHubReceiveMethods } from '../hooks/useHubReceiveMethods'
 import { URL_PARAM_ROOM } from '../constants'
 import { updateUrlWithoutRefresh } from '../helpers'
+import { useError } from '../hooks/useError'
 
 type FormProps = {
     roomName: { value: string }
@@ -17,6 +18,7 @@ export default function UserForm() {
 
     const { invokeHubMethod } = useHubInvokeMethods()
     const { createAllReceiveMethods } = useHubReceiveMethods()
+    const { error } = useError()
 
     const urlParamRoomId = new URL(location.href).searchParams?.get(URL_PARAM_ROOM)
 
@@ -48,20 +50,23 @@ export default function UserForm() {
     }
 
     return (
-        <form onSubmit={handleFormSubmit}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                {!urlParamRoomId && (
+        <>
+            <form onSubmit={handleFormSubmit}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    {!urlParamRoomId && (
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <label htmlFor="roomName">Room:</label>
+                            <input id='roomName' type='text' name='roomName' />
+                        </div>
+                    )}
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <label htmlFor="roomName">Room:</label>
-                        <input id='roomName' type='text' name='roomName' />
+                        <label htmlFor="userName">User:</label>
+                        <input id='userName' type='text' name='userName' />
                     </div>
-                )}
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <label htmlFor="userName">User:</label>
-                    <input id='userName' type='text' name='userName' />
+                    <button type='submit'>Get in</button>
                 </div>
-                <button type='submit'>Get in</button>
-            </div>
-        </form>
+            </form>
+            {error && <span><b>{error}</b></span>}
+        </>
     )
 }

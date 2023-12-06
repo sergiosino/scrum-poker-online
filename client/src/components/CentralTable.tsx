@@ -3,20 +3,23 @@ import { HubInvokeMethodsEnum, RoomStatesEnum } from "../enums"
 import { useHubInvokeMethods } from "../hooks/useHubInvokeMethods"
 import { GameContext } from '../contexts/GameContext'
 import UsersCards from './UsersCards'
+import { useError } from '../hooks/useError'
 
+const TEXT_SELECT_ISSUE = 'Select an issue!'
 const TEXT_SELECT_CARD = 'Select a card!'
+const DEFAULT_TABLE_CONTENT = <div style={{ height: 18 }} />
 
 export default function CentralTable() {
-    const { user, room } = useContext(GameContext)
+    const { user, room, issueVoting } = useContext(GameContext)
 
     const { invokeHubMethod } = useHubInvokeMethods()
+    const { error } = useError()
 
     if (!user || !room) { return }
 
     const numberUsersUp = Math.round(room.users.length / 2)
     const usersUp = room.users.slice(0, numberUsersUp)
     const usersDown = room.users.slice(numberUsersUp, room.users.length)
-    const issueVoting = room.issues.find(issue => issue.isVoting)
 
     // Calculate the average room value of the cards selected by the users
     const handleCalculatePokerResult = (): void => {
@@ -33,6 +36,26 @@ export default function CentralTable() {
         invokeHubMethod(HubInvokeMethodsEnum.KickOutUserFromRoom, userId)
     }
 
+    // Done in order to show always all the content of the table in the same place at the same place 
+    let topTableContent = DEFAULT_TABLE_CONTENT
+    let centralTableContent = DEFAULT_TABLE_CONTENT
+    let bottomTableContent = DEFAULT_TABLE_CONTENT
+
+    if (room.state === RoomStatesEnum.NoIssueSelected) {
+        topTableContent = <span>{TEXT_SELECT_ISSUE}</span>
+    }
+    if (issueVoting) {
+        topTableContent = <span className='one-row-limit'>Issue: {issueVoting.name}</span>
+    }
+    if (room.state === RoomStatesEnum.VotingIssue) {
+        centralTableContent = <button onClick={handleCalculatePokerResult}>Calculate</button>
+        bottomTableContent = user.cardValue ? bottomTableContent : (<span>{TEXT_SELECT_CARD}</span>)
+    }
+    if (issueVoting && room.state === RoomStatesEnum.WatchingFinalIssueAverage) {
+        centralTableContent = <button onClick={handleResetPokerValues}>Reset</button>
+        bottomTableContent = <span>The average is: <b>{issueVoting.average}</b></span>
+    }
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
             <UsersCards
@@ -40,29 +63,11 @@ export default function CentralTable() {
                 onKickOutClick={handleKickOutUser}
             />
             <div className='central-table'>
-                {issueVoting && (
-                    <span className='issue-name-row-limit'>{issueVoting.name}</span>
-                )}
-                {(room.state === RoomStatesEnum.NoCardsSelected) && (
-                    <span>{TEXT_SELECT_CARD}</span>
-                )}
-                {room.state === RoomStatesEnum.WithSomeSelectedCards && (
-                    <>
-                        <span>{TEXT_SELECT_CARD}</span>
-                        <button onClick={handleCalculatePokerResult}>
-                            Calculate
-                        </button>
-                    </>
-                )}
-                {room.state === RoomStatesEnum.WatchingFinalAverage && (
-                    <>
-                        <span>The average is: <b>{room.average}</b></span>
-                        <button style={{ marginTop: 10 }} onClick={handleResetPokerValues}>
-                            Reset
-                        </button>
-                    </>
-                )}
+                {topTableContent}
+                {centralTableContent}
+                {bottomTableContent}
             </div>
+            {error && <span><b>{error}</b></span>}
             <UsersCards
                 users={usersDown}
                 onKickOutClick={handleKickOutUser}

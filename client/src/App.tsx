@@ -3,7 +3,6 @@ import { useContext, useEffect } from 'react'
 import CentralTable from './components/CentralTable'
 import PokerCards from './components/PokerCards'
 import UserForm from './components/UserForm'
-import { useError } from './hooks/useError'
 import { GameContext } from './contexts/GameContext'
 import GameInfo from './components/GameInfo'
 import { HubConnectionContext } from './contexts/HubConnectionContext'
@@ -20,7 +19,6 @@ function App() {
 
   const { invokeHubMethod } = useHubInvokeMethods()
   const { createAllReceiveMethods } = useHubReceiveMethods()
-  const { error } = useError()
   const isUserInGame = !!(room && user)
 
   useEffect(() => {
@@ -47,7 +45,6 @@ function App() {
             ? <GameInfo />
             : <UserForm />
           }
-          {error && <span>{error}</span>}
         </div>
         {user && (
           <>

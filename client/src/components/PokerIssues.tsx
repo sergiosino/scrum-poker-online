@@ -6,10 +6,13 @@ import { HubInvokeMethodsEnum } from '../enums'
 
 interface IssueProps {
     issue: Issue,
+    isAdmin: boolean,
     handleVote: (issueId: string) => void
 }
 
-function Issue({ issue, handleVote }: IssueProps) {
+function Issue({ issue, isAdmin, handleVote }: IssueProps) {
+
+    const voteButtonClassName = isAdmin ? '' : 'visibility-hidden'
 
     const handleVoteClick = () => {
         handleVote(issue.id)
@@ -17,15 +20,15 @@ function Issue({ issue, handleVote }: IssueProps) {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, border: '1px solid black', borderRadius: 6, height: 100, padding: '20px 16px' }}>
-            <span style={{ flex: 1 }} className="issue-name-row-limit">{issue.name}</span>
+            <span style={{ flex: 1 }} className="one-row-limit">{issue.name}</span>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 {issue.isVoting ? (
-                    <button onClick={handleVoteClick}>
-                        Vote
-                    </button>
-                ) : (
                     <button>
                         Voting
+                    </button>
+                ) : (
+                    <button onClick={handleVoteClick} className={voteButtonClassName}>
+                        Vote
                     </button>
                 )}
                 <span style={{ border: '1px solid black', borderRadius: 6, padding: '2px 6px' }}>{issue.average}</span>
@@ -75,15 +78,17 @@ function IssueEditable({ handleSave, handleCancel }: IssueEditableProps) {
 export default function PokerIssues() {
     const [isAddingIssue, setIsAddingIssue] = useState(false)
 
-    const { room } = useContext(GameContext)
+    const { room, user } = useContext(GameContext)
     const { invokeHubMethod } = useHubInvokeMethods()
 
-    if (!room) { return }
+    if (!room || !user) { return }
 
     const listTopClassName = isAddingIssue ? 'issues-list-top-adding-new-issue' : 'issues-list-top'
 
     const handleNewIssueSave = (issueName: string): void => {
-        setIsAddingIssue(false)
+        invokeHubMethod(HubInvokeMethodsEnum.CreateNewIssue, issueName).then(() => {
+            setIsAddingIssue(false)
+        })
     }
 
     const handleNewIssueCancel = (): void => {
@@ -94,27 +99,42 @@ export default function PokerIssues() {
         setIsAddingIssue(true)
     }
 
-    const handleVoteIssue = (issueId: string): void => {
+    const handleVoteIssueClick = (issueId: string): void => {
+        invokeHubMethod(HubInvokeMethodsEnum.SelectIssueToVote, issueId)
+    }
 
+    const handleCloseIssuesSideNavClick = (): void => {
+        if (document.getElementById("issuesContainer") == null) { return }
+        (document.getElementById("issuesContainer") as HTMLElement).classList.remove('issues-container-side-navigation-show');
     }
 
     return (
-        <div className='issues-container'>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <h2>Issues</h2>
-                <button style={{ padding: '8px 12px' }} onClick={handleAddNewIssueClick}>
-                    +
-                </button>
-            </div>
-            {isAddingIssue && (
-                <div style={{ marginTop: 20 }}>
-                    <IssueEditable handleSave={handleNewIssueSave} handleCancel={handleNewIssueCancel} />
+        <div id='issuesContainer' className='issues-container'>
+            <div className='issues-header'>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <h2>Issues</h2>
+                    {user.isAdmin && (
+                        <button style={{ padding: '8px 12px' }} onClick={handleAddNewIssueClick}>
+                            +
+                        </button>
+                    )}
+                    <button
+                        className='issues-container-side-navigation-buttons-display'
+                        style={{ padding: '8px 12px' }}
+                        onClick={handleCloseIssuesSideNavClick}>
+                        x
+                    </button>
                 </div>
-            )}
+                {isAddingIssue && (
+                    <div style={{ marginTop: 20 }}>
+                        <IssueEditable handleSave={handleNewIssueSave} handleCancel={handleNewIssueCancel} />
+                    </div>
+                )}
+            </div>
             <ul className={`issues-list ${listTopClassName}`}>
                 {room.issues.map(issue => (
                     <li key={issue.id} style={{ margin: '10px 0px' }}>
-                        <Issue issue={issue} handleVote={handleVoteIssue} />
+                        <Issue issue={issue} isAdmin={user.isAdmin} handleVote={handleVoteIssueClick} />
                     </li>
                 ))}
             </ul>

@@ -92,8 +92,9 @@ button {
 .central-table {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-evenly;
     align-items: center;
+    gap: 5px;
     border: 1px solid black;
     width: 300px;
     height: 200px;
@@ -104,6 +105,13 @@ button {
     position: relative;
     border-left: 1px solid black;
     width: var(--issues-container-width);
+}
+
+.issues-container-side-navigation-buttons-display {
+    display: none;
+}
+
+.issues-header {
     padding: 20px var(--issues-container-vertical-padding);
 }
 
@@ -126,14 +134,18 @@ button {
     top: 210px;
 }
 
-.issue-name-row-limit {
+.one-row-limit {
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
 
-@media (min-width: 900px) {
+.visibility-hidden {
+    visibility: hidden;
+}
+
+@media (min-width: 1300px) {
     .cards-container {
         justify-content: center;
     }
@@ -161,7 +173,22 @@ button {
         height: 90px;
     }
 
+    .issues-container-side-navigation-buttons-display {
+        display: block;
+    }
+
+    .issues-container-side-navigation-show {
+        width: 100% !important;
+    }
+
     .issues-container {
-        display: none;
+        position: fixed;
+        top: 0px;
+        right: 0px;
+        bottom: 0px;
+        width: 0px;
+        z-index: 1;
+        background-color: white;
+        transition: 0.5s;
     }
 }

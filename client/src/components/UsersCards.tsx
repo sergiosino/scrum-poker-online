@@ -17,9 +17,8 @@ export default function UsersCards({ users, onKickOutClick }: UsersCardsProps) {
 
     const calculateUserCardValue = (roomUser: User): string => {
         if (!roomUser.cardValue) { return '' }
-        if (room.state === RoomStatesEnum.WithSomeSelectedCards) { return CARD_VALUE_NOT_VISIBLE }
-        if (room.state === RoomStatesEnum.WatchingFinalAverage) { return roomUser.cardValue }
-        return ''
+        if (room.state === RoomStatesEnum.WatchingFinalIssueAverage) { return roomUser.cardValue }
+        return CARD_VALUE_NOT_VISIBLE
     }
 
     return (

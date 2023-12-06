@@ -9,7 +9,7 @@ export default function GameInfo() {
 
     const { invokeHubMethod } = useHubInvokeMethods()
 
-    if(!room || !user) { return }
+    if (!room || !user) { return }
 
     const handleCopyInviteLinkClick = (): void => {
         const inviteUrl = getUrlWithRoomId(room.id)
@@ -23,11 +23,19 @@ export default function GameInfo() {
         })
     }
 
+    const handleShowIssuesSideNavClick = (): void => {
+        if (document.getElementById("issuesContainer") == null) { return }
+        (document.getElementById("issuesContainer") as HTMLElement).classList.add('issues-container-side-navigation-show');
+    }
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
             <div style={{ display: 'flex', gap: 10 }}>
                 <button onClick={handleCopyInviteLinkClick}>
                     Copy invite link
+                </button>
+                <button className='issues-container-side-navigation-buttons-display' onClick={handleShowIssuesSideNavClick}>
+                    Show issues
                 </button>
                 <button onClick={handleLeaveRoomClick}>
                     Leave

@@ -1,5 +1,5 @@
 import { PropsWithChildren, createContext, useRef, useState, MutableRefObject } from "react";
-import { Room, User } from "../types";
+import { Issue, Room, User } from "../types";
 import { STORAGE_USER_ID } from "../constants";
 
 interface GameContextProps {
@@ -8,6 +8,7 @@ interface GameContextProps {
     user: User | null,
     userId: MutableRefObject<string | null>,
     setUserId: (newUserId: string) => void,
+    issueVoting: Issue | null,
     leaveRoom: () => void,
 }
 
@@ -20,6 +21,7 @@ export function GameContextProvider({ children }: PropsWithChildren) {
     const user = userId.current
         ? room?.users.find(x => x?.id === userId.current) as User
         : null
+    const issueVoting = room?.issues.find(x => x.isVoting) ?? null
 
     const setUserId = (newUserId: string): void => {
         userId.current = newUserId
@@ -38,6 +40,7 @@ export function GameContextProvider({ children }: PropsWithChildren) {
             user,
             userId,
             setUserId,
+            issueVoting,
             leaveRoom
         }}>
             {children}
