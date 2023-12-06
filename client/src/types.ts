@@ -13,7 +13,6 @@ export type User = {
 export type Room = {
     id: string,
     name: string,
-    average: string,
     state: RoomStatesEnum,
     users: User[]
     issues: Issue[]
