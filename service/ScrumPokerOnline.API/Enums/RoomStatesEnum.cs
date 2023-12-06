@@ -2,8 +2,8 @@
 {
     public enum RoomStatesEnum
     {
-        NoCardsSelected = 0,
-        WithSomeSelectedCards = 1,
-        WatchingFinalAverage = 2,
+        NoIssueSelected = 0,
+        VotingIssue = 1,
+        WatchingFinalIssueAverage = 2
     }
 }

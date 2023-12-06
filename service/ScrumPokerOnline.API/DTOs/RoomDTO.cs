@@ -7,7 +7,6 @@ namespace ScrumPokerOnline.API.DTOs
     {
         public string Id { get; }
         public string Name { get; }
-        public string? Average { get; set; }
         public RoomStatesEnum State { get; set; }
         public List<UserDTO> Users { get; set; }
         public List<IssueDTO> Issues { get; set; }
@@ -19,8 +18,7 @@ namespace ScrumPokerOnline.API.DTOs
         {
             Id = Guid.NewGuid().ToString();
             Name = roomName;
-            Average = null;
-            State = RoomStatesEnum.NoCardsSelected;
+            State = RoomStatesEnum.NoIssueSelected;
             Users = new List<UserDTO>();
             Issues = new List<IssueDTO>();
             CreationDate = DateTime.Now;

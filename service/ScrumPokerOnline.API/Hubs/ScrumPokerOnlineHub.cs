@@ -17,7 +17,7 @@ namespace ScrumPokerOnline.API.Hubs
 
         public async Task<RoomDTO> CreateUserAndRoom(string roomName, string userName)
         {
-            if(string.IsNullOrWhiteSpace(roomName) || string.IsNullOrWhiteSpace(userName))
+            if (string.IsNullOrWhiteSpace(roomName) || string.IsNullOrWhiteSpace(userName))
             {
                 throw new HubException("Room and user name cannot be empty");
             }
@@ -83,19 +83,50 @@ namespace ScrumPokerOnline.API.Hubs
             return room;
         }
 
+        public async Task CreateNewIssue(string issueName)
+        {
+            RoomDTO room = CheckIfConnectionIdInRoom(true);
+
+            IssueDTO issue = new IssueDTO(issueName);
+            room.Issues.Add(issue);
+
+            await SendRoomUsersUpdatedInfo(room.Id);
+        }
+
+        public async Task SelectIssueToVote(string issueId)
+        {
+            RoomDTO room = CheckIfConnectionIdInRoom(true);
+
+            IssueDTO? issue = room.Issues.FirstOrDefault(x => x.Id == issueId);
+            if (issue == null)
+            {
+                throw new HubException("Error when trying to start voting the issue");
+            }
+
+            room.State = RoomStatesEnum.VotingIssue;
+            room.Users.ForEach(x => x.CardValue = null);
+            room.Issues.ForEach(x => x.IsVoting = false);
+            issue.IsVoting = true;
+
+            await SendRoomUsersUpdatedInfo(room.Id);
+        }
+
         public async Task SelectCardValue(string value)
         {
             RoomDTO room = CheckIfConnectionIdInRoom();
-            
-            if(room.State == RoomStatesEnum.WatchingFinalAverage)
+            if (room.State == RoomStatesEnum.WatchingFinalIssueAverage)
             {
                 throw new HubException("Reset the game before selecting a new card");
             }
 
+            IssueDTO? issue = room.Issues.FirstOrDefault(x => x.IsVoting);
+            if (issue == null)
+            {
+                throw new HubException("You need to choose an issue first");
+            }
+
             UserDTO user = room.Users.First(x => x.ConnectionId == Context.ConnectionId);
             user.CardValue = value;
-
-            room.State = RoomStatesEnum.WithSomeSelectedCards;
 
             await SendRoomUsersUpdatedInfo(room.Id);
         }
@@ -103,6 +134,12 @@ namespace ScrumPokerOnline.API.Hubs
         public async Task CalculateAverageRoomValue()
         {
             RoomDTO room = CheckIfConnectionIdInRoom();
+            IssueDTO? issue = room.Issues.FirstOrDefault(x => x.IsVoting);
+
+            if (issue == null)
+            {
+                throw new HubException("You need to choose an issue first");
+            }
 
             List<int> usersCardValues = room.Users
                 .Where(x => x.CardValue != null && int.TryParse(x.CardValue, out int temp))
@@ -114,8 +151,9 @@ namespace ScrumPokerOnline.API.Hubs
             {
                 average = usersCardValues.Average().ToString("0.00");
             }
-            room.Average = average;
-            room.State = RoomStatesEnum.WatchingFinalAverage;
+
+            issue.Average = average;
+            room.State = RoomStatesEnum.WatchingFinalIssueAverage;
 
             await SendRoomUsersUpdatedInfo(room.Id);
         }
@@ -124,8 +162,8 @@ namespace ScrumPokerOnline.API.Hubs
         {
             RoomDTO room = CheckIfConnectionIdInRoom();
 
-            room.State = RoomStatesEnum.NoCardsSelected;
-            room.Average = null;
+            room.State = RoomStatesEnum.NoIssueSelected;
+            room.Issues.ForEach(x => x.IsVoting = false);
             room.Users.ForEach(x =>
             {
                 x.CardValue = null;
@@ -163,7 +201,7 @@ namespace ScrumPokerOnline.API.Hubs
 
         private RoomDTO CheckIfConnectionIdInRoom(bool hasToBeAdmin = false)
         {
-            RoomDTO? room = _rooms.FirstOrDefault(x => x.Users.Any(u => u.ConnectionId == Context.ConnectionId 
+            RoomDTO? room = _rooms.FirstOrDefault(x => x.Users.Any(u => u.ConnectionId == Context.ConnectionId
                 && ((hasToBeAdmin && u.IsAdmin) || !hasToBeAdmin)));
 
             if (room == null)
