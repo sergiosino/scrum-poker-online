@@ -3,7 +3,7 @@ import { PropsWithChildren, createContext, useRef, useState, MutableRefObject } 
 interface GameContextProps {
     error: string | null,
     setError: (error: string | null) => void,
-    errorTimeout: MutableRefObject<number | null>,
+    errorTimeout: MutableRefObject<NodeJS.Timeout | null>,
 }
 
 export const ErrorContext = createContext<GameContextProps>({} as GameContextProps)
@@ -11,7 +11,7 @@ export const ErrorContext = createContext<GameContextProps>({} as GameContextPro
 export function ErrorContextProvider({ children }: PropsWithChildren) {
     const [error, setError] = useState<string | null>(null)
 
-    const errorTimeout = useRef<number | null>(null)
+    const errorTimeout = useRef<NodeJS.Timeout | null>(null)
 
     return (
         <ErrorContext.Provider value={{
