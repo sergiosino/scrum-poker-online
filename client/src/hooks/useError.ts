@@ -1,6 +1,7 @@
 import { useContext } from "react"
 import { HubError } from "../types"
 import { ErrorContext } from "../contexts/ErrorContext"
+import { CUSTOM_EXCEPTION_TEXT } from "../constants"
 
 // Returns the error returned by the Hub
 export function useError() {
@@ -8,7 +9,7 @@ export function useError() {
     const { error, errorTimeout, setError } = useContext(ErrorContext)
 
     const addErrorHub = (newError: HubError): void => {
-        const message = (newError?.message as string).split('HubException: ')[1]
+        const message = (newError?.message as string).split(CUSTOM_EXCEPTION_TEXT)[1]
         setError(message)
 
         if (errorTimeout.current) {
