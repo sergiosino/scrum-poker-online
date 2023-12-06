@@ -40,7 +40,7 @@ function App() {
     <div className='app-container'>
       <div className='app-principal-container'>
         <div className={`user-info-container ${isUserInGame ? 'user-info-container-in-game' : 'user-info-container-out-game'}`}>
-          <h1>Scrum poke online</h1>
+          <h1>Scrum poker online</h1>
           {isUserInGame
             ? <GameInfo />
             : <UserForm />
