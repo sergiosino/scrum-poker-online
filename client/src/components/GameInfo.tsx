@@ -41,8 +41,8 @@ export default function GameInfo() {
                     Leave
                 </button>
             </div>
-            <span><b>Room's name:</b> {room.name}</span>
-            <span><b>Your name:</b> {user.name}</span>
+            <span className='text-one-row-limit'><b>Room's name:</b> {room.name}</span>
+            <span className='text-one-row-limit'><b>Your name:</b> {user.name}</span>
         </div>
     )
 }

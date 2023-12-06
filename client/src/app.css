@@ -89,12 +89,20 @@ button {
     overflow-x: auto;
 }
 
+.text-100px-limit {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
+
 .central-table {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
     align-items: center;
     gap: 5px;
+    padding: 0px 20px;
     border: 1px solid black;
     width: 300px;
     height: 200px;
@@ -134,11 +142,12 @@ button {
     top: 210px;
 }
 
-.one-row-limit {
+.text-one-row-limit {
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .visibility-hidden {

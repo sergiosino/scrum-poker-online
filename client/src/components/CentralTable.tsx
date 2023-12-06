@@ -45,7 +45,7 @@ export default function CentralTable() {
         topTableContent = <span>{TEXT_SELECT_ISSUE}</span>
     }
     if (issueVoting) {
-        topTableContent = <span className='one-row-limit'>Issue: {issueVoting.name}</span>
+        topTableContent = <span className='text-one-row-limit'>Issue: {issueVoting.name}</span>
     }
     if (room.state === RoomStatesEnum.VotingIssue) {
         centralTableContent = <button onClick={handleCalculatePokerResult}>Calculate</button>

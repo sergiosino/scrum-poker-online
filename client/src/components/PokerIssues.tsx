@@ -20,7 +20,7 @@ function Issue({ issue, isAdmin, handleVote }: IssueProps) {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, border: '1px solid black', borderRadius: 6, height: 100, padding: '20px 16px' }}>
-            <span style={{ flex: 1 }} className="one-row-limit">{issue.name}</span>
+            <span style={{ flex: 1 }} className="text-one-row-limit">{issue.name}</span>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 {issue.isVoting ? (
                     <button>

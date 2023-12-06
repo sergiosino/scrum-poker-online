@@ -22,17 +22,19 @@ export default function UsersCards({ users, onKickOutClick }: UsersCardsProps) {
     }
 
     return (
-        <div style={{ display: 'flex', gap: 20 }}>
+        <ul style={{ whiteSpace: 'nowrap', listStyleType: 'none', padding: 0, margin: 0 }}>
             {users.map(roomUser => (
-                <Card
-                    key={roomUser.name}
-                    userName={roomUser.name}
-                    isAdmin={user.isAdmin}
-                    onKickOutClick={() => onKickOutClick && onKickOutClick(roomUser.id)}
-                >
-                    {calculateUserCardValue(roomUser)}
-                </Card>
+                <li key={roomUser.name} style={{ display: 'inline-block', margin: '0px 10px' }}>
+                    <Card
+                        key={roomUser.name}
+                        userName={roomUser.name}
+                        isAdmin={user.isAdmin}
+                        onKickOutClick={() => onKickOutClick && onKickOutClick(roomUser.id)}
+                    >
+                        {calculateUserCardValue(roomUser)}
+                    </Card>
+                </li>
             ))}
-        </div>
+        </ul>
     )
 }

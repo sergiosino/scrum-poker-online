@@ -27,7 +27,7 @@ export default function Card({
                 )}
             </div>
             {userName && (
-                <div style={{ display: "flex", justifyContent: 'center', marginTop: 5 }}>
+                <div className='text-100px-limit' style={{ display: "flex", justifyContent: 'center', marginTop: 5 }}>
                     <span>{userName}</span>
                 </div>
             )}

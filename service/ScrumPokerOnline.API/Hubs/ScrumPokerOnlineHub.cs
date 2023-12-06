@@ -9,6 +9,7 @@ namespace ScrumPokerOnline.API.Hubs
     {
         private readonly List<RoomDTO> _rooms;
         private const int HOURS_LIFE_ROOM = 4;
+        private const int LIMIT_USERS_ROOM = 10;
 
         public ScrumPokerOnlineHub(List<RoomDTO> rooms)
         {
@@ -47,6 +48,10 @@ namespace ScrumPokerOnline.API.Hubs
             if (room == null)
             {
                 throw new HubException("This room does not exists");
+            }
+            if (room.Users.Count == LIMIT_USERS_ROOM)
+            {
+                throw new HubException("User limit reached in the room");
             }
 
             bool userNameAlreadyExists = room.Users.Any(x => x.Name == userName);
