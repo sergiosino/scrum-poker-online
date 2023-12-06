@@ -3,6 +3,7 @@ import { GameContext } from '../contexts/GameContext'
 import { useHubInvokeMethods } from '../hooks/useHubInvokeMethods'
 import { HubInvokeMethodsEnum } from '../enums'
 import { getUrlWithRoomId, updateUrlToOriginWithRefresh } from '../helpers'
+import { User } from '../types'
 
 export default function GameInfo() {
     const { room, user, leaveRoom } = useContext(GameContext)
@@ -10,6 +11,8 @@ export default function GameInfo() {
     const { invokeHubMethod } = useHubInvokeMethods()
 
     if (!room || !user) { return }
+
+    const adminUserName = (room.users.find(x => x.isAdmin) as User).name
 
     const handleCopyInviteLinkClick = (): void => {
         const inviteUrl = getUrlWithRoomId(room.id)
@@ -41,7 +44,7 @@ export default function GameInfo() {
                     Leave
                 </button>
             </div>
-            <span className='text-one-row-limit'><b>Room's name:</b> {room.name}</span>
+            <span className='text-one-row-limit'><b>Room's name:</b> {room.name} (admin is {adminUserName})</span>
             <span className='text-one-row-limit'><b>Your name:</b> {user.name}</span>
         </div>
     )

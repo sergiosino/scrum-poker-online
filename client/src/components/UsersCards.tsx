@@ -21,13 +21,18 @@ export default function UsersCards({ users, onKickOutClick }: UsersCardsProps) {
         return CARD_VALUE_NOT_VISIBLE
     }
 
+    const canBeKicked = (roomUserId: string): boolean => {
+        if (user.isAdmin && roomUserId !== user.id) { return true }
+        return false
+    }
+
     return (
         <ul style={{ whiteSpace: 'nowrap', listStyleType: 'none', padding: 0, margin: 0 }}>
             {users.map(roomUser => (
                 <li key={roomUser.id} style={{ display: 'inline-block', margin: '0px 10px' }}>
                     <Card
                         userName={roomUser.name}
-                        isAdmin={user.isAdmin}
+                        canBeKicked={canBeKicked(roomUser.id)}
                         onKickOutClick={() => onKickOutClick && onKickOutClick(roomUser.id)}
                     >
                         {calculateUserCardValue(roomUser)}

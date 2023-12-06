@@ -4,9 +4,8 @@ import { useHubInvokeMethods } from "../hooks/useHubInvokeMethods"
 import { GameContext } from '../contexts/GameContext'
 import UsersCards from './UsersCards'
 import { useError } from '../hooks/useError'
+import { TEXT_SELECT_CARD, TEXT_SELECT_ISSUE_ADMIN, TEXT_SELECT_ISSUE_NO_ADMIN } from '../constants'
 
-const TEXT_SELECT_ISSUE = 'Select an issue!'
-const TEXT_SELECT_CARD = 'Select a card!'
 const DEFAULT_TABLE_CONTENT = <div style={{ height: 18 }} />
 
 export default function CentralTable() {
@@ -42,7 +41,7 @@ export default function CentralTable() {
     let bottomTableContent = DEFAULT_TABLE_CONTENT
 
     if (room.state === RoomStatesEnum.NoIssueSelected) {
-        topTableContent = <span>{TEXT_SELECT_ISSUE}</span>
+        topTableContent = <span>{user.isAdmin ? TEXT_SELECT_ISSUE_ADMIN : TEXT_SELECT_ISSUE_NO_ADMIN}</span>
     }
     if (issueVoting) {
         topTableContent = <span className='text-one-row-limit'>Issue: {issueVoting.name}</span>
@@ -52,7 +51,7 @@ export default function CentralTable() {
         bottomTableContent = user.cardValue ? bottomTableContent : (<span>{TEXT_SELECT_CARD}</span>)
     }
     if (issueVoting && room.state === RoomStatesEnum.WatchingFinalIssueAverage) {
-        centralTableContent = <button onClick={handleResetPokerValues}>Reset</button>
+        centralTableContent = <button onClick={handleResetPokerValues}>Complete</button>
         bottomTableContent = <span>The average is: <b>{issueVoting.average}</b></span>
     }
 

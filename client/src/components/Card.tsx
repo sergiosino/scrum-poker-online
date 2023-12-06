@@ -4,7 +4,7 @@ interface CardProps {
     onKickOutClick?: (value: string) => void,
     userName?: string,
     isSelected?: boolean,
-    isAdmin?: boolean,
+    canBeKicked?: boolean,
 }
 
 export default function Card({
@@ -13,14 +13,14 @@ export default function Card({
     userName,
     children,
     isSelected,
-    isAdmin
+    canBeKicked
 }: CardProps) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', border: '1px solid black', width: 50, height: 100, borderRadius: 6, backgroundColor: isSelected ? 'lightgray' : 'white' }}
                 onClick={() => onCardClick && children && onCardClick(children)} >
                 <span>{children}</span>
-                {isAdmin && (
+                {canBeKicked && (
                     <div style={{ position: 'absolute', right: 2, top: 2 }}>
                         <button onClick={() => onKickOutClick && userName && onKickOutClick(userName)}>x</button>
                     </div>
