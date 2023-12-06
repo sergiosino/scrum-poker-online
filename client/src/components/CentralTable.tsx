@@ -14,7 +14,7 @@ export default function CentralTable() {
     const { invokeHubMethod } = useHubInvokeMethods()
     const { error } = useError()
 
-    if (!user || !room) { return }
+    if (!user || !room) { return <></> }
 
     const numberUsersUp = Math.round(room.users.length / 2)
     const usersUp = room.users.slice(0, numberUsersUp)

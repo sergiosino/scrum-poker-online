@@ -13,7 +13,7 @@ interface UsersCardsProps {
 export default function UsersCards({ users, onKickOutClick }: UsersCardsProps) {
     const { user, room } = useContext(GameContext)
 
-    if (!user || !room) { return }
+    if (!user || !room) { return <></> }
 
     const calculateUserCardValue = (roomUser: User): string => {
         if (!roomUser.cardValue) { return '' }

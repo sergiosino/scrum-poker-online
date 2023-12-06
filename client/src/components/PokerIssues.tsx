@@ -81,7 +81,7 @@ export default function PokerIssues() {
     const { room, user } = useContext(GameContext)
     const { invokeHubMethod } = useHubInvokeMethods()
 
-    if (!room || !user) { return }
+    if (!room || !user) { return <></> }
 
     const listTopClassName = isAddingIssue ? 'issues-list-top-adding-new-issue' : 'issues-list-top'
 

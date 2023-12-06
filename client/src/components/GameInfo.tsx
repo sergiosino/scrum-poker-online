@@ -10,7 +10,7 @@ export default function GameInfo() {
 
     const { invokeHubMethod } = useHubInvokeMethods()
 
-    if (!room || !user) { return }
+    if (!room || !user) { return <></> }
 
     const adminUserName = (room.users.find(x => x.isAdmin) as User).name
 
