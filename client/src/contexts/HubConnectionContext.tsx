@@ -12,10 +12,6 @@ export function HubConnectionContextProvider({ children }: PropsWithChildren) {
 
     useEffect(() => {
         const createConnection = async (): Promise<void> => {
-
-            console.log("import.meta.env.VITE_API_URL", import.meta.env.VITE_API_URL)
-            console.log("process.env.VITE_API_URL", process.env.VITE_API_URL)
-
             const apiUrl = import.meta.env.VITE_API_URL
             const connection = new HubConnectionBuilder()
                 .withUrl(apiUrl)
