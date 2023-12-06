@@ -19,6 +19,7 @@ function App() {
 
   const { invokeHubMethod } = useHubInvokeMethods()
   const { createAllReceiveMethods } = useHubReceiveMethods()
+  
   const isUserInGame = !!(room && user)
 
   useEffect(() => {
