@@ -1,9 +1,10 @@
 import { useContext } from 'react'
-import { GameContext } from "../contexts/GameContext"
-import { User, UsersInfo } from "../types"
+import { RoomContext } from "../../contexts/RoomContext"
+import { User, UsersInfo } from "../../types"
 import Card from "./Card"
-import { RoomStatesEnum } from '../enums'
-import { CARD_VALUE_NOT_VISIBLE } from '../constants'
+import { RoomStatesEnum } from '../../enums'
+import { CARD_VALUE_NOT_VISIBLE } from '../../constants'
+import { UsersContext } from '../../contexts/UsersContext'
 
 interface UsersCardsProps {
     users: UsersInfo,
@@ -11,9 +12,10 @@ interface UsersCardsProps {
 }
 
 export default function UsersCards({ users, onKickOutClick }: UsersCardsProps) {
-    const { user, room } = useContext(GameContext)
+    const { room } = useContext(RoomContext)
+    const { currentUser } = useContext(UsersContext)
 
-    if (!user || !room) { return <></> }
+    if (!currentUser || !room) { return <></> }
 
     const calculateUserCardValue = (roomUser: User): string => {
         if (!roomUser.cardValue) { return '' }
@@ -22,7 +24,7 @@ export default function UsersCards({ users, onKickOutClick }: UsersCardsProps) {
     }
 
     const canBeKicked = (roomUserId: string): boolean => {
-        if (user.isAdmin && roomUserId !== user.id) { return true }
+        if (currentUser.isAdmin && roomUserId !== currentUser.id) { return true }
         return false
     }
 

@@ -17,12 +17,9 @@ export function HubConnectionContextProvider({ children }: PropsWithChildren) {
                 .withUrl(apiUrl)
                 .configureLogging(LogLevel.Information)
                 .build()
-
             await connection.start()
-            
             setConnection(connection)
         }
-        
         createConnection()
     }, [])
 

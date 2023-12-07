@@ -27,22 +27,24 @@ namespace ScrumPokerOnline.API.Services
             _connectionId = connectionId;
         }
 
-        public async Task<RoomDTO> CreateUserAndRoom(string roomName, string userName)
+        public async Task CreateUserAndRoom(string roomName, string userName)
         {
             Room room = new Room(roomName);
             User user = new User(_connectionId, userName, true);
             room.Users.Add(user);
 
+            _roomsRepository.DeleteUsers(_connectionId);
             _roomsRepository.Add(room);
             _roomsRepository.DeleteAbandoned();
 
             await _scrumPokerOnlineHub.Groups.AddToGroupAsync(_connectionId, room.IdString);
-            await _scrumPokerOnlineHub.Clients.Client(_connectionId).SendAsync(HubInvokeMethodsEnum.ReceiveMyUserId.ToString(), user.Id);
 
-            return new RoomDTO(room);
+            await SendUserIdToCurrentconnection(user.Id);
+            await SendRoom(room);
+            await SendUsers(room.IdString, room.Users);
         }
 
-        public async Task<RoomDTO> CreateUserAndJoinRoom(string roomId, string userName)
+        public async Task CreateUserAndJoinRoom(string roomId, string userName)
         {
             Room room = _roomsRepository.GetByRoomId(roomId);
             if (room == null)
@@ -63,17 +65,18 @@ namespace ScrumPokerOnline.API.Services
             User user = new User(_connectionId, userName);
             room.Users.Add(user);
 
+            _roomsRepository.DeleteUsers(_connectionId);
             _roomsRepository.Update(room);
 
             await _scrumPokerOnlineHub.Groups.AddToGroupAsync(_connectionId, room.IdString);
-            await _scrumPokerOnlineHub.Clients.Client(_connectionId).SendAsync(HubInvokeMethodsEnum.ReceiveMyUserId.ToString(), user.Id);
 
-            await SendRoomUsersUpdatedInfo(room);
-
-            return new RoomDTO(room);
+            await SendUserIdToCurrentconnection(user.Id);
+            await SendRoomToCurrentConnection(room);
+            await SendUsers(room.IdString, room.Users);
+            await SendIssuesToCurrentConnection(room.Issues);
         }
 
-        public async Task<RoomDTO> RetrieveUserRoom(string userId)
+        public async Task RetrieveUserRoom(string userId)
         {
             Room room = _roomsRepository.GetByUserId(userId);
             if (room == null)
@@ -89,7 +92,9 @@ namespace ScrumPokerOnline.API.Services
 
             _roomsRepository.Update(room);
 
-            return new RoomDTO(room);
+            await SendRoomToCurrentConnection(room);
+            await SendUsersToCurrentConnection(room.Users);
+            await SendIssuesToCurrentConnection(room.Issues);
         }
 
         public async Task CreateNewIssue(string issueName)
@@ -101,7 +106,7 @@ namespace ScrumPokerOnline.API.Services
 
             _roomsRepository.Update(room);
 
-            await SendRoomUsersUpdatedInfo(room);
+            await SendIssues(room.IdString, room.Issues);
         }
 
         public async Task SelectIssueToVote(string issueId)
@@ -120,7 +125,9 @@ namespace ScrumPokerOnline.API.Services
 
             _roomsRepository.Update(room);
 
-            await SendRoomUsersUpdatedInfo(room);
+            await SendRoom(room);
+            await SendUsers(room.IdString, room.Users);
+            await SendIssues(room.IdString, room.Issues);
         }
 
         public async Task SelectCardValue(string value)
@@ -142,7 +149,7 @@ namespace ScrumPokerOnline.API.Services
 
             _roomsRepository.Update(room);
 
-            await SendRoomUsersUpdatedInfo(room);
+            await SendUsers(room.IdString, room.Users);
         }
 
         public async Task CalculateAverageRoomValue()
@@ -170,7 +177,8 @@ namespace ScrumPokerOnline.API.Services
 
             _roomsRepository.Update(room);
 
-            await SendRoomUsersUpdatedInfo(room);
+            await SendRoom(room);
+            await SendIssues(room.IdString, room.Issues);
         }
 
         public async Task RestartRoomVote()
@@ -178,15 +186,14 @@ namespace ScrumPokerOnline.API.Services
             Room room = CheckIfConnectionIdInRoom();
 
             room.State = RoomStatesEnum.NoIssueSelected;
+            room.Users.ForEach(x => x.CardValue = null);
             room.Issues.ForEach(x => x.IsVoting = false);
-            room.Users.ForEach(x =>
-            {
-                x.CardValue = null;
-            });
 
             _roomsRepository.Update(room);
 
-            await SendRoomUsersUpdatedInfo(room);
+            await SendRoom(room);
+            await SendUsers(room.IdString, room.Users);
+            await SendIssues(room.IdString, room.Issues);
         }
 
         public async Task KickOutUserFromRoom(string userId)
@@ -199,17 +206,19 @@ namespace ScrumPokerOnline.API.Services
             _roomsRepository.Update(room);
 
             await _scrumPokerOnlineHub.Groups.RemoveFromGroupAsync(userToRemove.ConnectionId, room.IdString);
-            await _scrumPokerOnlineHub.Clients.Client(userToRemove.ConnectionId).SendAsync(HubInvokeMethodsEnum.ReceiveKickOut.ToString());
 
-            await SendRoomUsersUpdatedInfo(room, userToRemove.Id);
+            await _scrumPokerOnlineHub.Clients.Client(userToRemove.ConnectionId).SendAsync(HubInvokeMethodsEnum.ReceiveKickOut.ToString());
+            await SendUsers(room.IdString, room.Users);
         }
 
         public async Task LeaveRoom()
         {
             Room room = CheckIfConnectionIdInRoom();
-            
+
             User userToLeave = room.Users.First(x => x.ConnectionId == _connectionId);
             room.Users.Remove(userToLeave);
+
+            await _scrumPokerOnlineHub.Groups.RemoveFromGroupAsync(userToLeave.ConnectionId, room.IdString);
 
             if (room.Users.Any())
             {
@@ -219,7 +228,8 @@ namespace ScrumPokerOnline.API.Services
                 }
 
                 _roomsRepository.Update(room);
-                await SendRoomUsersUpdatedInfo(room);
+
+                await SendUsers(room.IdString, room.Users);
             }
             else
             {
@@ -229,16 +239,45 @@ namespace ScrumPokerOnline.API.Services
 
         #region Private methods
 
-        private async Task SendRoomUsersUpdatedInfo(Room room)
+        private async Task SendRoom(Room room)
         {
             RoomDTO roomDTO = new RoomDTO(room);
             await _scrumPokerOnlineHub.Clients.Group(roomDTO.Id).SendAsync(HubInvokeMethodsEnum.ReceiveRoomUpdate.ToString(), roomDTO);
         }
 
-        private async Task SendRoomUsersUpdatedInfo(Room room, object arg1)
+        private async Task SendRoomToCurrentConnection(Room room)
         {
             RoomDTO roomDTO = new RoomDTO(room);
-            await _scrumPokerOnlineHub.Clients.Group(roomDTO.Id).SendAsync(HubInvokeMethodsEnum.ReceiveRoomUpdate.ToString(), roomDTO, arg1);
+            await _scrumPokerOnlineHub.Clients.Client(_connectionId).SendAsync(HubInvokeMethodsEnum.ReceiveRoomUpdate.ToString(), roomDTO);
+        }
+
+        private async Task SendIssues(string roomId, List<Issue> issues)
+        {
+            List<IssueDTO> issuesDTO = issues.Select(x => new IssueDTO(x)).ToList();
+            await _scrumPokerOnlineHub.Clients.Group(roomId).SendAsync(HubInvokeMethodsEnum.ReceiveIssuesUpdate.ToString(), issuesDTO);
+        }
+
+        private async Task SendIssuesToCurrentConnection(List<Issue> issues)
+        {
+            List<IssueDTO> issuesDTO = issues.Select(x => new IssueDTO(x)).ToList();
+            await _scrumPokerOnlineHub.Clients.Client(_connectionId).SendAsync(HubInvokeMethodsEnum.ReceiveIssuesUpdate.ToString(), issuesDTO);
+        }
+
+        private async Task SendUsers(string roomId, List<User> users)
+        {
+            List<UserDTO> usersDTO = users.Select(x => new UserDTO(x)).ToList();
+            await _scrumPokerOnlineHub.Clients.Group(roomId).SendAsync(HubInvokeMethodsEnum.ReceiveUsersUpdate.ToString(), usersDTO);
+        }
+
+        private async Task SendUsersToCurrentConnection(List<User> users)
+        {
+            List<UserDTO> usersDTO = users.Select(x => new UserDTO(x)).ToList();
+            await _scrumPokerOnlineHub.Clients.Client(_connectionId).SendAsync(HubInvokeMethodsEnum.ReceiveUsersUpdate.ToString(), usersDTO);
+        }
+
+        private async Task SendUserIdToCurrentconnection(string userId)
+        {
+            await _scrumPokerOnlineHub.Clients.Client(_connectionId).SendAsync(HubInvokeMethodsEnum.ReceiveMyUserId.ToString(), userId);
         }
 
         private Room CheckIfConnectionIdInRoom(bool hasToBeAdmin = false)

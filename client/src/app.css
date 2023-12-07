@@ -7,9 +7,8 @@
     box-sizing: border-box;
 }
 
-h1,
 h2 {
-    margin: 5px 0px;
+    margin: 8px 0px;
 }
 
 html,
@@ -19,19 +18,13 @@ body {
     margin: 0px;
 }
 
-p {
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
 button {
-    border: 1px solid black;
-    border-radius: 6px;
+    width: 100%;
 }
 
 .app-container {
     display: flex;
-    flex-direction: 'row';
+    flex-direction: row;
 }
 
 .app-principal-container {
@@ -44,9 +37,9 @@ button {
     align-items: center;
     justify-content: center;
     position: fixed;
-    padding-bottom: 5px;
     left: 0px;
     top: 0px;
+    padding: 24px 16px;
 }
 
 .user-info-container-out-game {
@@ -63,7 +56,7 @@ button {
     align-items: center;
     justify-content: center;
     position: fixed;
-    padding-bottom: 5px;
+    padding-bottom: 8px;
     left: 0px;
     right: 0px;
     top: 0px;
@@ -71,13 +64,6 @@ button {
 
 .user-form-container-ingame {
     right: var(--issues-container-width);
-}
-
-.central-table-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
 }
 
 .cards-container {
@@ -101,8 +87,7 @@ button {
     flex-direction: column;
     justify-content: space-evenly;
     align-items: center;
-    gap: 5px;
-    padding: 0px 20px;
+    padding: 0px 24px;
     border: 1px solid black;
     width: 300px;
     height: 200px;
@@ -120,7 +105,7 @@ button {
 }
 
 .issues-header {
-    padding: 20px var(--issues-container-vertical-padding);
+    padding: 24px var(--issues-container-vertical-padding);
 }
 
 .issues-list {
@@ -139,7 +124,7 @@ button {
 }
 
 .issues-list-top-adding-new-issue {
-    top: 210px;
+    top: 208px;
 }
 
 .text-one-row-limit {
@@ -166,20 +151,18 @@ button {
     }
 
     .user-info-container {
-        border-bottom: 1px solid black;
         background-color: white;
         z-index: 1;
     }
 
     .cards-container {
         right: 0px;
-        border-top: 1px solid black;
         background-color: white;
         z-index: 1;
     }
 
     .central-table {
-        height: 90px;
+        height: 100px;
     }
 
     .issues-container-side-navigation-buttons-display {
@@ -199,5 +182,14 @@ button {
         z-index: 1;
         background-color: white;
         transition: 0.5s;
+    }
+}
+
+@media (min-height: 600px) {
+    .central-table-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
     }
 }

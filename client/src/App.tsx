@@ -1,53 +1,27 @@
 import './app.css'
-import { useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import CentralTable from './components/CentralTable'
-import PokerCards from './components/PokerCards'
+import PokerCards from './components/cards/PokerCards'
 import UserForm from './components/UserForm'
-import { GameContext } from './contexts/GameContext'
+import { RoomContext } from './contexts/RoomContext'
 import GameInfo from './components/GameInfo'
-import { HubConnectionContext } from './contexts/HubConnectionContext'
-import { useHubInvokeMethods } from './hooks/useHubInvokeMethods'
-import { HubInvokeMethodsEnum } from './enums'
-import { useHubReceiveMethods } from './hooks/useHubReceiveMethods'
-import { Room } from './types'
-import { updateUrlWithoutRefresh } from './helpers'
-import PokerIssues from './components/PokerIssues'
+import PokerIssues from './components/issues/PokerIssues'
 
 function App() {
-  const { room, setRoom, user, userId, leaveRoom } = useContext(GameContext)
-  const { connection } = useContext(HubConnectionContext)
+  const { room } = useContext(RoomContext)
 
-  const { invokeHubMethod } = useHubInvokeMethods()
-  const { createAllReceiveMethods } = useHubReceiveMethods()
-  
-  const isUserInGame = !!(room && user)
-
-  useEffect(() => {
-    // After a page refresh room info is lost so,
-    // if userId exists and does not have room, try to retrieve room info
-    if (connection && userId.current && !room) {
-      invokeHubMethod(HubInvokeMethodsEnum.RetrieveUserRoom, userId.current).then((retrievedRoom: Room) => {
-        updateUrlWithoutRefresh(retrievedRoom.id)
-        createAllReceiveMethods()
-        setRoom(retrievedRoom)
-      }).catch(() => {
-        leaveRoom()
-      })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connection])
+  const isUserInGame = !!room
 
   return (
     <div className='app-container'>
       <div className='app-principal-container'>
         <div className={`user-info-container ${isUserInGame ? 'user-info-container-in-game' : 'user-info-container-out-game'}`}>
-          <h1>Scrum poker online</h1>
           {isUserInGame
             ? <GameInfo />
             : <UserForm />
           }
         </div>
-        {user && (
+        {isUserInGame && (
           <>
             <div className='central-table-container'>
               <CentralTable />

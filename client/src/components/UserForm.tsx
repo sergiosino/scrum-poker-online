@@ -1,12 +1,8 @@
-import { FormEvent, useContext } from 'react'
-import { GameContext } from '../contexts/GameContext'
+import { FormEvent } from 'react'
 import { HubInvokeMethodsEnum } from '../enums'
-import { Room } from '../types'
 import { useHubInvokeMethods } from '../hooks/useHubInvokeMethods'
-import { useHubReceiveMethods } from '../hooks/useHubReceiveMethods'
 import { URL_PARAM_ROOM } from '../constants'
-import { updateUrlWithoutRefresh } from '../helpers'
-import { useError } from '../hooks/useError'
+import { useMessage } from '../hooks/useMessage'
 
 type FormProps = {
     roomName: { value: string }
@@ -14,11 +10,8 @@ type FormProps = {
 }
 
 export default function UserForm() {
-    const { setRoom } = useContext(GameContext)
-
     const { invokeHubMethod } = useHubInvokeMethods()
-    const { createAllReceiveMethods } = useHubReceiveMethods()
-    const { error } = useError()
+    const { message } = useMessage()
 
     const urlParamRoomId = new URL(location.href).searchParams?.get(URL_PARAM_ROOM)
 
@@ -26,33 +19,26 @@ export default function UserForm() {
         event.preventDefault();
         const target = event.target as EventTarget & FormProps
 
-        createAllReceiveMethods()
-
         if (urlParamRoomId) {
             invokeHubMethod(
                 HubInvokeMethodsEnum.CreateUserAndJoinRoom,
                 urlParamRoomId,
                 target.userName.value
-            ).then((room: Room) => {
-                setRoom(room)
-            })
+            )
         }
         else {
             invokeHubMethod(
                 HubInvokeMethodsEnum.CreateUserAndRoom,
                 target.roomName.value,
                 target.userName.value
-            ).then((room: Room) => {
-                updateUrlWithoutRefresh(room.id)
-                setRoom(room)
-            })
+            )
         }
     }
 
     return (
         <>
             <form onSubmit={handleFormSubmit}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                     {!urlParamRoomId && (
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <label htmlFor="roomName">Room:</label>
@@ -66,7 +52,7 @@ export default function UserForm() {
                     <button type='submit'>Get in</button>
                 </div>
             </form>
-            {error && <span><b>{error}</b></span>}
+            {message && <span><b>{message}</b></span>}
         </>
     )
 }

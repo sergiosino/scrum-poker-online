@@ -14,30 +14,30 @@ namespace ScrumPokerOnline.API.Hubs
             _roomsService = roomService;
         }
 
-        public async Task<RoomDTO> CreateUserAndRoom(string roomName, string userName)
+        public async Task CreateUserAndRoom(string roomName, string userName)
         {
             ParamsValidationAndSetConnectionId(new Dictionary<string, string> { 
                 { "room name", roomName },
                 { "username", userName }
             });
-            return await _roomsService.CreateUserAndRoom(roomName, userName);
+            await _roomsService.CreateUserAndRoom(roomName, userName);
         }
 
-        public async Task<RoomDTO> CreateUserAndJoinRoom(string roomId, string userName)
+        public async Task CreateUserAndJoinRoom(string roomId, string userName)
         {
             ParamsValidationAndSetConnectionId(new Dictionary<string, string> {
                 { "room id", roomId },
                 { "username", userName }
             });
-            return await _roomsService.CreateUserAndJoinRoom(roomId, userName);
+            await _roomsService.CreateUserAndJoinRoom(roomId, userName);
         }
 
-        public async Task<RoomDTO> RetrieveUserRoom(string userId)
+        public async Task RetrieveUserRoom(string userId)
         {
             ParamsValidationAndSetConnectionId(new Dictionary<string, string> { 
                 { "user id", userId } 
             });
-            return await _roomsService.RetrieveUserRoom(userId);
+            await _roomsService.RetrieveUserRoom(userId);
         }
 
         public async Task CreateNewIssue(string issueName)

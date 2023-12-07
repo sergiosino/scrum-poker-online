@@ -20,7 +20,9 @@ export enum HubInvokeMethodsEnum
 
 export enum HubReceiveMethodsEnum
 {
-    ReceiveMyUserId = 'ReceiveMyUserId',
     ReceiveRoomUpdate = 'ReceiveRoomUpdate',
+    ReceiveIssuesUpdate = 'ReceiveIssuesUpdate',
+    ReceiveUsersUpdate = 'ReceiveUsersUpdate',
+    ReceiveMyUserId = 'ReceiveMyUserId',
     ReceiveKickOut = 'ReceiveKickOut',
 }

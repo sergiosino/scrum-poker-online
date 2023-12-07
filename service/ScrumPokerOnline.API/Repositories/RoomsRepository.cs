@@ -51,6 +51,14 @@ namespace ScrumPokerOnline.API.Repositories
                 update);
         }
 
+        public void DeleteUsers(string connectionId)
+        {
+            var filter = Builders<Room>.Filter.ElemMatch(r => r.Users, u => u.ConnectionId == connectionId);
+            var update = Builders<Room>.Update.PullFilter(r => r.Users, u => u.ConnectionId == connectionId);
+
+            _roomsCollection.UpdateMany(filter, update);
+        }
+
         public void Delete(string roomId)
         {
             _roomsCollection.DeleteOne(x => x.Id.ToString() == roomId);

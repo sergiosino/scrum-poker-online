@@ -1,17 +1,20 @@
 import { useContext } from 'react'
-import { HubInvokeMethodsEnum } from "../enums"
-import { useHubInvokeMethods } from "../hooks/useHubInvokeMethods"
+import { HubInvokeMethodsEnum } from "../../enums"
+import { useHubInvokeMethods } from "../../hooks/useHubInvokeMethods"
 import Card from "./Card"
-import { GameContext } from '../contexts/GameContext'
-import { CARD_VALUES } from '../constants'
+import { CARD_VALUES } from '../../constants'
+import { UsersContext } from '../../contexts/UsersContext'
 
 export default function PokerCards() {
-    const { user } = useContext(GameContext)
+    const { currentUser } = useContext(UsersContext)
+
     const { invokeHubMethod } = useHubInvokeMethods()
+
+    if (!currentUser) { return <></> }
 
     // Share the user selected value card
     const handleCardClick = (value: string): void => {
-        if (value != user?.cardValue) {
+        if (value != currentUser.cardValue) {
             invokeHubMethod(HubInvokeMethodsEnum.SelectCardValue, value)
         }
     }
@@ -22,7 +25,7 @@ export default function PokerCards() {
                 <li key={cardValue} style={{ display: 'inline-block', margin: '0px 5px' }}>
                     <Card
                         onCardClick={handleCardClick}
-                        isSelected={user?.cardValue === cardValue}
+                        isSelected={currentUser.cardValue === cardValue}
                     >
                         {cardValue}
                     </Card>

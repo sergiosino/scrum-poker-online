@@ -1,29 +1,23 @@
 import { useContext } from 'react'
-import { GameContext } from '../contexts/GameContext'
-import { useHubInvokeMethods } from '../hooks/useHubInvokeMethods'
-import { HubInvokeMethodsEnum } from '../enums'
-import { getUrlWithRoomId, updateUrlToOriginWithRefresh } from '../helpers'
-import { User } from '../types'
+import { RoomContext } from '../contexts/RoomContext'
+import { getUrlWithRoomId } from '../helpers'
+import { useMessage } from '../hooks/useMessage'
 
 export default function GameInfo() {
-    const { room, user, leaveRoom } = useContext(GameContext)
+    const { room, leaveRoom } = useContext(RoomContext)
 
-    const { invokeHubMethod } = useHubInvokeMethods()
+    const { message, addMessage } = useMessage()
 
-    if (!room || !user) { return <></> }
-
-    const adminUserName = (room.users.find(x => x.isAdmin) as User).name
+    if (!room) { return <></> }
 
     const handleCopyInviteLinkClick = (): void => {
         const inviteUrl = getUrlWithRoomId(room.id)
         navigator.clipboard.writeText(inviteUrl.href)
+        addMessage('🥳 Invitation link copied to clipboard! 🥳')
     }
 
     const handleLeaveRoomClick = (): void => {
-        invokeHubMethod(HubInvokeMethodsEnum.LeaveRoom).finally(() => {
-            leaveRoom()
-            updateUrlToOriginWithRefresh()
-        })
+        leaveRoom()
     }
 
     const handleShowIssuesSideNavClick = (): void => {
@@ -32,10 +26,11 @@ export default function GameInfo() {
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-            <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, width: '100%', maxWidth: 400 }}>
+            <span className='text-one-row-limit'><b>Room's name:</b> {room.name}</span>
+            <div style={{ display: 'flex', gap: 16, width: '100%' }}>
                 <button onClick={handleCopyInviteLinkClick}>
-                    Copy invite link
+                    Get invite link
                 </button>
                 <button className='issues-container-side-navigation-buttons-display' onClick={handleShowIssuesSideNavClick}>
                     Show issues
@@ -44,8 +39,7 @@ export default function GameInfo() {
                     Leave
                 </button>
             </div>
-            <span className='text-one-row-limit'><b>Room's name:</b> {room.name} (admin is {adminUserName})</span>
-            <span className='text-one-row-limit'><b>Your name:</b> {user.name}</span>
+            {message && <span><b>{message}</b></span>}
         </div>
     )
 }

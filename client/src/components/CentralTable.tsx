@@ -1,24 +1,26 @@
 import { useContext } from 'react'
 import { HubInvokeMethodsEnum, RoomStatesEnum } from "../enums"
 import { useHubInvokeMethods } from "../hooks/useHubInvokeMethods"
-import { GameContext } from '../contexts/GameContext'
-import UsersCards from './UsersCards'
-import { useError } from '../hooks/useError'
+import { RoomContext } from '../contexts/RoomContext'
+import UsersCards from './cards/UsersCards'
 import { TEXT_SELECT_CARD, TEXT_SELECT_ISSUE_ADMIN, TEXT_SELECT_ISSUE_NO_ADMIN } from '../constants'
+import { IssuesContext } from '../contexts/IssuesContext'
+import { UsersContext } from '../contexts/UsersContext'
 
 const DEFAULT_TABLE_CONTENT = <div style={{ height: 18 }} />
 
 export default function CentralTable() {
-    const { user, room, issueVoting } = useContext(GameContext)
+    const { room } = useContext(RoomContext)
+    const { users, currentUser } = useContext(UsersContext)
+    const { issueVoting } = useContext(IssuesContext)
 
     const { invokeHubMethod } = useHubInvokeMethods()
-    const { error } = useError()
 
-    if (!user || !room) { return <></> }
+    if (!currentUser || !room) { return <></> }
 
-    const numberUsersUp = Math.round(room.users.length / 2)
-    const usersUp = room.users.slice(0, numberUsersUp)
-    const usersDown = room.users.slice(numberUsersUp, room.users.length)
+    const numberUsersUp = Math.round(users.length / 2)
+    const usersUp = users.slice(0, numberUsersUp)
+    const usersDown = users.slice(numberUsersUp, users.length)
 
     // Calculate the average room value of the cards selected by the users
     const handleCalculatePokerResult = (): void => {
@@ -41,36 +43,39 @@ export default function CentralTable() {
     let bottomTableContent = DEFAULT_TABLE_CONTENT
 
     if (room.state === RoomStatesEnum.NoIssueSelected) {
-        topTableContent = <span>{user.isAdmin ? TEXT_SELECT_ISSUE_ADMIN : TEXT_SELECT_ISSUE_NO_ADMIN}</span>
+        topTableContent = <span>{currentUser.isAdmin ? TEXT_SELECT_ISSUE_ADMIN : TEXT_SELECT_ISSUE_NO_ADMIN}</span>
     }
     if (issueVoting) {
-        topTableContent = <span className='text-one-row-limit'>Issue: {issueVoting.name}</span>
+        topTableContent = <span className='text-one-row-limit'>Issue: <b>{issueVoting.name}</b></span>
     }
     if (room.state === RoomStatesEnum.VotingIssue) {
-        centralTableContent = <button onClick={handleCalculatePokerResult}>Calculate</button>
-        bottomTableContent = user.cardValue ? bottomTableContent : (<span>{TEXT_SELECT_CARD}</span>)
+        centralTableContent = <button style={{ maxWidth: 100 }} onClick={handleCalculatePokerResult}>Calculate</button>
+        bottomTableContent = currentUser.cardValue ? bottomTableContent : (<span>{TEXT_SELECT_CARD}</span>)
     }
     if (issueVoting && room.state === RoomStatesEnum.WatchingFinalIssueAverage) {
-        centralTableContent = <button onClick={handleResetPokerValues}>Complete</button>
+        centralTableContent = <button style={{ maxWidth: 100 }} onClick={handleResetPokerValues}>Complete</button>
         bottomTableContent = <span>The average is: <b>{issueVoting.average}</b></span>
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
-            <UsersCards
-                users={usersUp}
-                onKickOutClick={handleKickOutUser}
-            />
-            <div className='central-table'>
-                {topTableContent}
-                {centralTableContent}
-                {bottomTableContent}
+        <>
+            <div style={{ height: 110 }} />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
+                <UsersCards
+                    users={usersUp}
+                    onKickOutClick={handleKickOutUser}
+                />
+                <div className='central-table'>
+                    {topTableContent}
+                    {centralTableContent}
+                    {bottomTableContent}
+                </div>
+                <UsersCards
+                    users={usersDown}
+                    onKickOutClick={handleKickOutUser}
+                />
             </div>
-            {error && <span><b>{error}</b></span>}
-            <UsersCards
-                users={usersDown}
-                onKickOutClick={handleKickOutUser}
-            />
-        </div>
+            <div style={{ height: 125 }} />
+        </>
     )
 }
