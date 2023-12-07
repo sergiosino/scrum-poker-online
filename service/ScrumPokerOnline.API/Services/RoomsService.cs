@@ -49,17 +49,17 @@ namespace ScrumPokerOnline.API.Services
             Room room = _roomsRepository.GetByRoomId(roomId);
             if (room == null)
             {
-                throw new HubException("This room does not exists");
+                throw new HubException("Connection attempt failed, the room appears to no longer exist");
             }
             if (room.Users.Count == _limitUsersInRoom)
             {
-                throw new HubException("User limit reached in the room");
+                throw new HubException($"The room has reached the limit of {_limitUsersInRoom} users");
             }
 
             bool userNameAlreadyExists = room.Users.Any(x => x.Name == userName);
             if (userNameAlreadyExists)
             {
-                throw new HubException("User name already exists in the room");
+                throw new HubException("The username already exists in the room, try another one!");
             }
 
             User user = new User(_connectionId, userName);
@@ -81,7 +81,7 @@ namespace ScrumPokerOnline.API.Services
             Room room = _roomsRepository.GetByUserId(userId);
             if (room == null)
             {
-                throw new HubException("The room could not be recovered");
+                throw new HubException("Reconnection attempt failed, the room appears to no longer exist");
             }
 
             User user = room.Users.First(x => x.Id == userId);
@@ -115,7 +115,7 @@ namespace ScrumPokerOnline.API.Services
             Issue? issue = room.Issues.FirstOrDefault(x => x.Id == issueId);
             if (issue == null)
             {
-                throw new HubException("Error when trying to start voting the issue");
+                throw new HubException("The problem you are trying to vote on seems to not exist, refresh and try again");
             }
 
             room.State = RoomStatesEnum.VotingIssue;
@@ -138,13 +138,16 @@ namespace ScrumPokerOnline.API.Services
                 throw new HubException("Reset the game before selecting a new card");
             }
 
+            User user = room.Users.First(x => x.ConnectionId == _connectionId);
             Issue? issue = room.Issues.FirstOrDefault(x => x.IsVoting);
             if (issue == null)
             {
-                throw new HubException("You need to choose an issue first");
+                if (user.IsAdmin)
+                    throw new HubException("You have to choose an issue to vote on first");
+                else
+                    throw new HubException("The administrator has to choose an issue to vote on first");
             }
 
-            User user = room.Users.First(x => x.ConnectionId == _connectionId);
             user.CardValue = value;
 
             _roomsRepository.Update(room);
@@ -158,7 +161,7 @@ namespace ScrumPokerOnline.API.Services
             Issue? issue = room.Issues.FirstOrDefault(x => x.IsVoting);
             if (issue == null)
             {
-                throw new HubException("You need to choose an issue first");
+                throw new HubException("No issues are being voted on");
             }
 
             List<int> usersCardValues = room.Users
@@ -285,13 +288,13 @@ namespace ScrumPokerOnline.API.Services
             Room room = _roomsRepository.GetByConnectionId(_connectionId);
             if (room == null)
             {
-                throw new HubException("User does not exist");
+                throw new HubException("There was an error with your connection, refresh and try again");
             }
 
             User? user = room.Users.FirstOrDefault(x => x.ConnectionId == _connectionId && ((hasToBeAdmin && x.IsAdmin) || !hasToBeAdmin));
             if (user == null)
             {
-                throw new HubException("User does not have permissions");
+                throw new HubException("You don't have permissions to do that");
             }
 
             return room;

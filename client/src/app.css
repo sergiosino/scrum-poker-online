@@ -24,7 +24,6 @@ button {
 
 .app-container {
     display: flex;
-    flex-direction: row;
 }
 
 .app-principal-container {
