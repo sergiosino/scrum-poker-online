@@ -3,7 +3,7 @@ import { HubInvokeMethodsEnum } from '../enums'
 import { useHubInvokeMethods } from '../hooks/useHubInvokeMethods'
 import { URL_PARAM_ROOM } from '../constants'
 import { useMessage } from '../hooks/useMessage'
-import { updateUrlToOriginWithRefresh } from '../helpers'
+import { getUrlParam, updateUrlToOriginWithRefresh } from '../helpers'
 
 type FormProps = {
     roomName: { value: string }
@@ -14,7 +14,8 @@ export default function UserForm() {
     const { invokeHubMethod } = useHubInvokeMethods()
     const { message } = useMessage()
 
-    const urlParamRoomId = new URL(location.href).searchParams?.get(URL_PARAM_ROOM)
+
+    const urlParamRoomId = getUrlParam(URL_PARAM_ROOM)
 
     const handleFormSubmit = (event: FormEvent<HTMLFormElement>): void => {
         event.preventDefault();

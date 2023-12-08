@@ -1,9 +1,10 @@
 import { PropsWithChildren, createContext, useState, useEffect, useContext } from "react";
 import { Room } from "../types";
-import { STORAGE_USER_ID } from "../constants";
+import { STORAGE_USER_ID, URL_PARAM_ROOM } from "../constants";
 import { HubConnectionContext } from "./HubConnectionContext";
 import { HubInvokeMethodsEnum, HubReceiveMethodsEnum } from "../enums";
 import { useHubInvokeMethods } from "../hooks/useHubInvokeMethods";
+import { updateUrlToOriginWithoutRefresh, updateUrlWithoutRefresh } from "../helpers";
 
 interface GameContextProps {
     room: Room | null,
@@ -13,15 +14,16 @@ interface GameContextProps {
 export const RoomContext = createContext<GameContextProps>({} as GameContextProps)
 
 export function RoomContextProvider({ children }: PropsWithChildren) {
-    const { connection } = useContext(HubConnectionContext)
-
     const [room, setRoom] = useState<Room | null>(null)
+
+    const { connection } = useContext(HubConnectionContext)
 
     const { invokeHubMethod } = useHubInvokeMethods()
 
     const removeGameInfo = () => {
         sessionStorage.removeItem(STORAGE_USER_ID)
         setRoom(null)
+        updateUrlToOriginWithoutRefresh()
     }
 
     const leaveRoom = (): void => {
@@ -33,10 +35,11 @@ export function RoomContextProvider({ children }: PropsWithChildren) {
     useEffect(() => {
         connection?.on(HubReceiveMethodsEnum.ReceiveRoomUpdate, (room: Room) => {
             setRoom(room)
+            updateUrlWithoutRefresh(URL_PARAM_ROOM, room.id)
         })
         connection?.on(HubReceiveMethodsEnum.ReceiveKickOut, () => {
-            removeGameInfo()
             alert('You have been kicked out of the room')
+            removeGameInfo()
         })
 
         // After a page refresh room info is lost so,
@@ -51,7 +54,7 @@ export function RoomContextProvider({ children }: PropsWithChildren) {
     }, [connection])
 
     return (
-        <RoomContext.Provider value={{ room, leaveRoom}}>
+        <RoomContext.Provider value={{ room, leaveRoom }}>
             {children}
         </RoomContext.Provider>
     )

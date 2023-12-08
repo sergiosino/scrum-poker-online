@@ -2,6 +2,7 @@ import { useContext } from 'react'
 import { RoomContext } from '../contexts/RoomContext'
 import { getUrlWithRoomId } from '../helpers'
 import { useMessage } from '../hooks/useMessage'
+import { URL_PARAM_ROOM } from '../constants'
 
 export default function GameInfo() {
     const { room, leaveRoom } = useContext(RoomContext)
@@ -11,7 +12,7 @@ export default function GameInfo() {
     if (!room) { return <></> }
 
     const handleCopyInviteLinkClick = (): void => {
-        const inviteUrl = getUrlWithRoomId(room.id)
+        const inviteUrl = getUrlWithRoomId(URL_PARAM_ROOM, room.id)
         navigator.clipboard.writeText(inviteUrl.href)
         addMessage('🥳 Invitation link copied to clipboard! 🥳')
     }

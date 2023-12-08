@@ -7,15 +7,15 @@ import { IssuesContextProvider } from './contexts/IssuesContext.tsx'
 import { UsersContextProvider } from './contexts/UsersContext.tsx'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <HubConnectionContextProvider>
-    <RoomContextProvider>
-      <UsersContextProvider>
-        <IssuesContextProvider>
-          <MessageContextProvider>
+  <MessageContextProvider>
+    <HubConnectionContextProvider>
+      <RoomContextProvider>
+        <UsersContextProvider>
+          <IssuesContextProvider>
             <App />
-          </MessageContextProvider>
-        </IssuesContextProvider>
-      </UsersContextProvider>
-    </RoomContextProvider>
-  </HubConnectionContextProvider>
+          </IssuesContextProvider>
+        </UsersContextProvider>
+      </RoomContextProvider>
+    </HubConnectionContextProvider>
+  </MessageContextProvider>
 )
