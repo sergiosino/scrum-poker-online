@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using ScrumPokerOnline.API.DTOs;
-using ScrumPokerOnline.API.Models;
 using ScrumPokerOnline.API.Services;
 
 namespace ScrumPokerOnline.API.Hubs

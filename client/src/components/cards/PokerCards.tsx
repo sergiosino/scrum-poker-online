@@ -20,9 +20,9 @@ export default function PokerCards() {
     }
 
     return (
-        <ul style={{ display:'flex', whiteSpace: 'nowrap', listStyleType: 'none', padding: 0, margin: 0 }}>
+        <ul style={{ display:'flex', whiteSpace: 'nowrap', listStyleType: 'none', padding: 0, margin: 0, gap: 8 }}>
             {CARD_VALUES.map(cardValue => (
-                <li key={cardValue} style={{ display: 'inline-block', margin: '0px 5px' }}>
+                <li key={cardValue} style={{ display: 'inline-block' }}>
                     <Card
                         onCardClick={handleCardClick}
                         isSelected={currentUser.cardValue === cardValue}

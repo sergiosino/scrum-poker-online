@@ -14,8 +14,8 @@ export default function Issue({ issue, isAdmin, handleVote }: IssueProps) {
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', border: '1px solid black', borderRadius: 6, height: 100, padding: '20px 16px' }}>
-            <span style={{ flex: 1 }} className="text-one-row-limit">{issue.name}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', border: '1px solid black', borderRadius: 6, padding: '24px 16px', gap: 16 }}>
+            <span>{issue.name}</span>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', width: 80 }}>
                     {issue.isVoting ? (
