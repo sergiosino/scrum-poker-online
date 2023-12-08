@@ -20,7 +20,7 @@ export default function PokerCards() {
     }
 
     return (
-        <ul style={{ whiteSpace: 'nowrap', listStyleType: 'none', padding: 0 }}>
+        <ul style={{ whiteSpace: 'nowrap', listStyleType: 'none', padding: 0, margin: 0 }}>
             {CARD_VALUES.map(cardValue => (
                 <li key={cardValue} style={{ display: 'inline-block', margin: '0px 5px' }}>
                     <Card

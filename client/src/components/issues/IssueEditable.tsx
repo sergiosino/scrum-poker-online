@@ -25,7 +25,7 @@ export default function IssueEditable({ handleSave, handleCancel }: IssueEditabl
                     <input id='issueName' type='text' name='issueName' />
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                    <button style={{ padding: '4px 6px' }} onClick={handleCancel}>
+                    <button onClick={handleCancel}>
                         Cancel
                     </button>
                     <button type='submit'>

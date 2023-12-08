@@ -73,6 +73,7 @@ button {
     right: var(--issues-container-width);
     bottom: 0px;
     overflow-x: auto;
+    padding: 16px;
 }
 
 .text-100px-limit {
