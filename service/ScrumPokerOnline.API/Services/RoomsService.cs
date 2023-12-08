@@ -40,8 +40,9 @@ namespace ScrumPokerOnline.API.Services
             await _scrumPokerOnlineHub.Groups.AddToGroupAsync(_connectionId, room.IdString);
 
             await SendUserIdToCurrentconnection(user.Id);
-            await SendRoom(room);
-            await SendUsers(room.IdString, room.Users);
+            await SendRoomToCurrentConnection(room);
+            await SendUsersToCurrentConnection(room.Users);
+            await SendIssuesToCurrentConnection(room.Issues);
         }
 
         public async Task CreateUserAndJoinRoom(string roomId, string userName)
