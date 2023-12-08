@@ -17,7 +17,13 @@ export function HubConnectionContextProvider({ children }: PropsWithChildren) {
                 .withUrl(apiUrl)
                 .configureLogging(LogLevel.Information)
                 .build()
+            
+            connection.onclose(() => {
+                alert('Disconnected from the server, refresh the page to continue')
+            })
+
             await connection.start()
+
             setConnection(connection)
         }
         createConnection()

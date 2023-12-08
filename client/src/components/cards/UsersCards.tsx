@@ -29,7 +29,7 @@ export default function UsersCards({ users, onKickOutClick }: UsersCardsProps) {
     }
 
     return (
-        <ul style={{ whiteSpace: 'nowrap', listStyleType: 'none', padding: 0, margin: 0 }}>
+        <ul style={{ display: 'flex', whiteSpace: 'nowrap', listStyleType: 'none', padding: 0, margin: 0 }}>
             {users.map(roomUser => (
                 <li key={roomUser.id} style={{ display: 'inline-block', margin: '0px 10px' }}>
                     <Card

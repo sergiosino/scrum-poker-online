@@ -13,7 +13,8 @@ export function useHubInvokeMethods() {
   const invokeHubMethod = async<T = any> (hubInvokeMethod: HubInvokeMethodsEnum, ...args: any[]): Promise<T> => {
     return connection?.invoke(hubInvokeMethod, ...args).catch((e: HubError) => {
       if((e.message as string).includes(CUSTOM_EXCEPTION_TEXT)) { addErrorHub(e) }
-      else { addErrorMessage(UNCONTROLLED_ERROR) }      
+      else { addErrorMessage(UNCONTROLLED_ERROR) }
+      throw e
     })
   }
 
