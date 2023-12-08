@@ -36,6 +36,7 @@ export function RoomContextProvider({ children }: PropsWithChildren) {
         })
         connection?.on(HubReceiveMethodsEnum.ReceiveKickOut, () => {
             removeGameInfo()
+            alert('You have been kicked out of the room')
         })
 
         // After a page refresh room info is lost so,
