@@ -3,6 +3,7 @@ import { HubInvokeMethodsEnum } from '../enums'
 import { useHubInvokeMethods } from '../hooks/useHubInvokeMethods'
 import { URL_PARAM_ROOM } from '../constants'
 import { useMessage } from '../hooks/useMessage'
+import { updateUrlToOriginWithRefresh } from '../helpers'
 
 type FormProps = {
     roomName: { value: string }
@@ -35,10 +36,14 @@ export default function UserForm() {
         }
     }
 
+    const handleCreateNewRoom = () => {
+        updateUrlToOriginWithRefresh()
+    }
+
     return (
         <>
             <form onSubmit={handleFormSubmit}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 8, textAlign: 'left' }}>
                     {!urlParamRoomId && (
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <label htmlFor="roomName">Room:</label>
@@ -50,6 +55,9 @@ export default function UserForm() {
                         <input id='userName' type='text' name='userName' />
                     </div>
                     <button type='submit'>Get in</button>
+                    {urlParamRoomId && (
+                        <button type='button' onClick={handleCreateNewRoom}>Create new room</button>
+                    )}
                 </div>
             </form>
             {message && <span><b>{message}</b></span>}
