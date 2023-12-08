@@ -10,10 +10,9 @@ type FormProps = {
     userName: { value: string }
 }
 
-export default function UserForm() {
+export default function InitialFormView() {
     const { invokeHubMethod } = useHubInvokeMethods()
     const { message } = useMessage()
-
 
     const urlParamRoomId = getUrlParam(URL_PARAM_ROOM)
 
@@ -42,16 +41,16 @@ export default function UserForm() {
     }
 
     return (
-        <>
+        <div className={'user-info-container user-info-container-out-game'}>
             <form onSubmit={handleFormSubmit}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 8, textAlign: 'left' }}>
+                <div className='user-form-container'>
                     {!urlParamRoomId && (
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <div className='label-input-container'>
                             <label htmlFor="roomName">Room:</label>
                             <input id='roomName' type='text' name='roomName' />
                         </div>
                     )}
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div className='label-input-container'>
                         <label htmlFor="userName">User:</label>
                         <input id='userName' type='text' name='userName' />
                     </div>
@@ -62,6 +61,6 @@ export default function UserForm() {
                 </div>
             </form>
             {message && <span><b>{message}</b></span>}
-        </>
+        </div>
     )
 }
