@@ -35,6 +35,7 @@ button {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    text-align: center;
     position: fixed;
     left: 0px;
     top: 0px;
